@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Events</div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ Add Event</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="tabs">
+        <div class="tab active" onclick="filterTab('upcoming',this)">Upcoming</div>
+        <div class="tab" onclick="filterTab('all',this)">All Events</div>
+        <div class="tab" onclick="filterTab('recurring',this)">Recurring</div>
+      </div>
+      <div id="eventsList"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Event</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="eventForm">
+      <input type="hidden" id="evId">
+      <div class="form-group"><label>Event Name</label><input type="text" id="evName" required placeholder="e.g. National Rum Day"></div>
+      <div class="form-group"><label>Description</label><textarea id="evDesc" rows="3" placeholder="What's happening..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Date</label><input type="date" id="evDate"></div>
+        <div class="form-group"><label>Time</label><input type="text" id="evTime" placeholder="e.g. 7:00 PM – 9:00 PM"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Type</label>
+          <select id="evType">
+            <option>Weekly Event</option>
+            <option>Special Event</option>
+            <option>National Day</option>
+            <option>Holiday</option>
+            <option>Private Event</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Recurring</label>
+          <select id="evRecurring">
+            <option value="none">Does Not Repeat</option>
+            <option value="weekly">Every Week</option>
+            <option value="monthly">Every Month</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="evTickets" style="width:auto">
+          Enable Ticket Sales / Reservations Required
+        </label>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Event</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('events.html');
+
+if (DB.get('events').length === 0) {
+  const events = [
+    { name: 'Wine & Cheese Tasting Night', desc: '8-course guided tasting experience. Rare cheeses paired with hand-selected wines.', date: '', time: '7:00 PM – 8:30 PM', type: 'Weekly Event', recurring: 'weekly', tickets: true },
+    { name: 'Cheese Happy Hour',           desc: 'Discounted cheese flights and wine pours all evening.', date: '', time: '4 PM – Close', type: 'Weekly Event', recurring: 'weekly', tickets: false },
+    { name: 'National Rum Day',            desc: 'Join us on National Rum Day on August 16th!', date: '2026-08-16', time: '11:00 AM – 11:59 PM', type: 'National Day', recurring: 'none', tickets: false },
+    { name: 'National Fajita Day',         desc: 'Come grab some sizzling goodness for National Fajita Day!', date: '2026-08-19', time: '11:00 AM – 11:59 PM', type: 'National Day', recurring: 'none', tickets: false },
+    { name: 'National Whiskey Sour Day',   desc: "It's National Whiskey Sour Day! Come down and let us make you a great Whiskey Sour.", date: '2026-08-25', time: '11:00 AM – 11:59 PM', type: 'National Day', recurring: 'none', tickets: false },
+  ];
+  events.forEach(e => DB.add('events', e));
+}
+
+let currentFilter = 'upcoming';
+
+function filterTab(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  let data = DB.get('events');
+  const today = new Date().toISOString().split('T')[0];
+  if (currentFilter === 'upcoming') data = data.filter(e => !e.date || e.date >= today || e.recurring !== 'none');
+  if (currentFilter === 'recurring') data = data.filter(e => e.recurring !== 'none');
+
+  const el = document.getElementById('eventsList');
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state card"><div class="empty-state-icon">🎉</div><h3>No events found</h3></div>';
+    return;
+  }
+
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">${data.map(e => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+            <h3>${e.name}</h3>
+            <span class="badge badge-${e.type==='Weekly Event'?'blue':e.type==='National Day'?'yellow':e.type==='Holiday'?'green':'gray'}">${e.type}</span>
+            ${e.recurring !== 'none' ? `<span class="badge badge-blue">🔁 ${e.recurring}</span>` : ''}
+            ${e.tickets ? `<span class="badge badge-green">🎟 Tickets/Reservations</span>` : ''}
+          </div>
+          <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:10px">${e.desc}</p>
+          <div style="display:flex;gap:20px;font-size:0.825rem">
+            ${e.date ? `<span>📅 ${e.date}</span>` : '<span style="color:var(--text-muted)">📅 Every week</span>'}
+            <span>🕐 ${e.time}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-left:16px">
+          <button class="btn btn-sm btn-outline" onclick="editEvent('${e.id}')">Edit</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="deleteEvent('${e.id}')">Del</button>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function openModal(data) {
+  document.getElementById('modal').classList.add('open');
+  if (data) {
+    document.getElementById('modalTitle').textContent = 'Edit Event';
+    document.getElementById('evId').value = data.id;
+    document.getElementById('evName').value = data.name;
+    document.getElementById('evDesc').value = data.desc;
+    document.getElementById('evDate').value = data.date || '';
+    document.getElementById('evTime').value = data.time;
+    document.getElementById('evType').value = data.type;
+    document.getElementById('evRecurring').value = data.recurring;
+    document.getElementById('evTickets').checked = data.tickets;
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add Event';
+    document.getElementById('eventForm').reset();
+    document.getElementById('evId').value = '';
+  }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function editEvent(id) { const e = DB.get('events').find(x=>x.id==id); if(e) openModal(e); }
+function deleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  DB.delete('events', id);
+  toast('Deleted');
+  render();
+}
+
+document.getElementById('eventForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('evId').value;
+  const data = {
+    name:      document.getElementById('evName').value,
+    desc:      document.getElementById('evDesc').value,
+    date:      document.getElementById('evDate').value,
+    time:      document.getElementById('evTime').value,
+    type:      document.getElementById('evType').value,
+    recurring: document.getElementById('evRecurring').value,
+    tickets:   document.getElementById('evTickets').checked,
+  };
+  if (id) { DB.update('events', id, data); toast('Event updated!', 'success'); }
+  else    { DB.add('events', data);        toast('Event added!', 'success'); }
+  closeModal();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

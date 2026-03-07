@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Manage Users</div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ Invite User</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card">
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:20px">Manage your staff's access to the admin dashboard.</p>
+        <div id="usersList"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Invite User</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="userForm">
+      <div class="form-group"><label>Name</label><input type="text" id="uName" required></div>
+      <div class="form-group"><label>Email</label><input type="email" id="uEmail" required></div>
+      <div class="form-group"><label>Phone</label><input type="tel" id="uPhone"></div>
+      <div class="form-group"><label>Role</label>
+        <select id="uRole">
+          <option>Owner</option>
+          <option>Manager</option>
+          <option>Staff</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('users.html');
+
+if (!localStorage.getItem('bt_users')) {
+  localStorage.setItem('bt_users', JSON.stringify([
+    { id: '1', name: 'Sam',          email: 'sam@bartentampa.com',         phone: '(612) 617-2422', role: 'Owner' },
+    { id: '2', name: 'Cam',          email: 'cheesepleasetampa@gmail.com', phone: '(612) 607-2422', role: 'Manager' },
+    { id: '3', name: 'Courtney Barnes', email: 'amazingguay@gmail.com',    phone: '(190) 148-7081', role: 'Staff' },
+    { id: '4', name: 'Samir',        email: 'samirashkidi@gmail.com',      phone: '',               role: 'Owner' },
+  ]));
+}
+
+function getUsers() { return JSON.parse(localStorage.getItem('bt_users') || '[]'); }
+function setUsers(u) { localStorage.setItem('bt_users', JSON.stringify(u)); }
+
+function render() {
+  const users = getUsers();
+  document.getElementById('usersList').innerHTML = users.map(u => `
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)">
+      <div style="width:42px;height:42px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--accent);flex-shrink:0">
+        ${u.name[0]}
+      </div>
+      <div style="flex:1">
+        <strong>${u.name}</strong>
+        <div style="font-size:0.8rem;color:var(--text-muted)">${u.email}${u.phone ? ' · ' + u.phone : ''}</div>
+      </div>
+      <span class="badge badge-${u.role==='Owner'?'blue':u.role==='Manager'?'green':'gray'}">${u.role}</span>
+      <button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="removeUser('${u.id}')">Remove</button>
+    </div>
+  `).join('');
+}
+
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function removeUser(id) {
+  if (!confirm('Remove this user?')) return;
+  setUsers(getUsers().filter(u => u.id !== id));
+  toast('User removed');
+  render();
+}
+
+document.getElementById('userForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const users = getUsers();
+  users.push({
+    id:    Date.now().toString(),
+    name:  document.getElementById('uName').value,
+    email: document.getElementById('uEmail').value,
+    phone: document.getElementById('uPhone').value,
+    role:  document.getElementById('uRole').value,
+  });
+  setUsers(users);
+  toast('User added!', 'success');
+  closeModal();
+  render();
+  document.getElementById('userForm').reset();
+});
+
+render();
+</script>
+</body>
+</html>

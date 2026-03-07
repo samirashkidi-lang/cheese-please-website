@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Campaigns — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Email Campaigns</div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ Create Campaign</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- Stats Row -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px" id="emailStats"></div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="filterTab('draft',this)">Drafts</div>
+        <div class="tab" onclick="filterTab('scheduled',this)">Scheduled</div>
+        <div class="tab" onclick="filterTab('sent',this)">Sent</div>
+        <div class="tab" onclick="filterTab('all',this)">All</div>
+      </div>
+
+      <div id="emailList"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Campaign Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Create Email Campaign</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="emailForm">
+      <input type="hidden" id="campId">
+      <div class="form-group"><label>Subject Line</label><input type="text" id="campSubject" required placeholder="e.g. 🧀 This Friday — Wine & Cheese Tasting Night!"></div>
+      <div class="form-group"><label>Preview Text</label><input type="text" id="campPreview" placeholder="Short text that shows in inbox..."></div>
+      <div class="form-group"><label>Campaign Type</label>
+        <select id="campType">
+          <option>Weekly Newsletter</option>
+          <option>Special Promotion</option>
+          <option>Event Announcement</option>
+          <option>Holiday Campaign</option>
+          <option>Custom</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Body / Message</label><textarea id="campBody" rows="8" placeholder="Write your email content here..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Send Date</label><input type="date" id="campDate"></div>
+        <div class="form-group"><label>Send Time</label><input type="time" id="campTime" value="10:00"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-outline" onclick="saveDraft()">Save Draft</button>
+        <button type="submit" class="btn btn-primary">Schedule Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('emails.html');
+
+if (DB.get('emails').length === 0) {
+  const emails = [
+    {
+      subject: "🧀 This Friday — Wine & Cheese Tasting Night!",
+      preview: "8 courses. Perfect pairings. Limited seats.",
+      type: 'Weekly Newsletter',
+      body: "Hey cheese lover,\n\nFriday is almost here and we want you at our Wine & Cheese Tasting Night...",
+      date: new Date(Date.now() + 2*86400000).toISOString().split('T')[0],
+      time: '10:00',
+      status: 'scheduled',
+      opens: 0, clicks: 0, sent: 0
+    },
+    {
+      subject: "🍷 Wine Down Wednesday — 50% Off Tonight!",
+      preview: "Your midweek escape starts at 4 PM.",
+      type: 'Special Promotion',
+      body: "Hey,\n\nIt's Wine Down Wednesday! Come in tonight for 50% off select wines...",
+      date: new Date(Date.now() - 7*86400000).toISOString().split('T')[0],
+      time: '09:00',
+      status: 'sent',
+      opens: 847, clicks: 312, sent: 1710
+    },
+    {
+      subject: "Ladies Night This Thursday 🎉",
+      preview: "20% off wine + $4 beers all night long",
+      type: 'Special Promotion',
+      body: "Hey ladies,\n\nThursday is YOUR night at Bar Ten & Cheese Please...",
+      date: '',
+      time: '',
+      status: 'draft',
+      opens: 0, clicks: 0, sent: 0
+    },
+  ];
+  emails.forEach(e => DB.add('emails', e));
+}
+
+let currentFilter = 'draft';
+
+function filterTab(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function renderStats() {
+  const all = DB.get('emails');
+  const sent = all.filter(e => e.status === 'sent');
+  const totalSent = sent.reduce((s,e) => s + (e.sent||0), 0);
+  const totalOpens = sent.reduce((s,e) => s + (e.opens||0), 0);
+  const openRate = totalSent ? Math.round(totalOpens/totalSent*100) : 0;
+
+  document.getElementById('emailStats').innerHTML = `
+    <div class="stat-card"><div class="stat-icon">📧</div><div class="stat-label">Campaigns Sent</div><div class="stat-value">${sent.length}</div></div>
+    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Total Delivered</div><div class="stat-value">${totalSent.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="stat-icon">👀</div><div class="stat-label">Total Opens</div><div class="stat-value">${totalOpens.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-label">Avg Open Rate</div><div class="stat-value">${openRate}%</div></div>
+  `;
+}
+
+function render() {
+  let data = DB.get('emails');
+  if (currentFilter !== 'all') data = data.filter(e => e.status === currentFilter);
+
+  const el = document.getElementById('emailList');
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state card"><div class="empty-state-icon">📧</div><h3>No campaigns here</h3></div>';
+    return;
+  }
+
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:12px">${data.map(e => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+            <strong style="font-size:1rem">${e.subject}</strong>
+            <span class="badge badge-${e.status==='sent'?'green':e.status==='scheduled'?'blue':'gray'}">${e.status}</span>
+            <span class="badge badge-gray">${e.type}</span>
+          </div>
+          <p style="font-size:0.825rem;color:var(--text-muted);margin-bottom:10px">${e.preview}</p>
+          ${e.status === 'sent' ? `
+            <div style="display:flex;gap:20px;font-size:0.825rem">
+              <span>📤 Sent: <strong>${(e.sent||0).toLocaleString()}</strong></span>
+              <span>👀 Opens: <strong>${(e.opens||0).toLocaleString()}</strong></span>
+              <span>🖱 Clicks: <strong>${(e.clicks||0).toLocaleString()}</strong></span>
+              <span>📊 Rate: <strong>${e.sent ? Math.round((e.opens/e.sent)*100) : 0}%</strong></span>
+            </div>
+          ` : e.date ? `<span style="font-size:0.825rem;color:var(--text-muted)">📅 Scheduled for ${e.date} at ${e.time}</span>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${e.status === 'draft' ? `<button class="btn btn-sm btn-primary" onclick="scheduleEmail('${e.id}')">Schedule</button>` : ''}
+          <button class="btn btn-sm btn-outline" onclick="editEmail('${e.id}')">Edit</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="deleteEmail('${e.id}')">Del</button>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function scheduleEmail(id) {
+  const date = prompt('Send date (YYYY-MM-DD):');
+  const time = prompt('Send time (HH:MM):');
+  if (!date) return;
+  DB.update('emails', id, { status: 'scheduled', date, time });
+  toast('Campaign scheduled!', 'success');
+  render();
+}
+
+function openModal(data) {
+  document.getElementById('modal').classList.add('open');
+  if (data) {
+    document.getElementById('modalTitle').textContent = 'Edit Campaign';
+    document.getElementById('campId').value = data.id;
+    document.getElementById('campSubject').value = data.subject;
+    document.getElementById('campPreview').value = data.preview;
+    document.getElementById('campType').value = data.type;
+    document.getElementById('campBody').value = data.body;
+    document.getElementById('campDate').value = data.date || '';
+    document.getElementById('campTime').value = data.time || '10:00';
+  } else {
+    document.getElementById('modalTitle').textContent = 'Create Campaign';
+    document.getElementById('emailForm').reset();
+    document.getElementById('campId').value = '';
+  }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function editEmail(id) { const e = DB.get('emails').find(x=>x.id==id); if(e) openModal(e); }
+
+function deleteEmail(id) {
+  if (!confirm('Delete this campaign?')) return;
+  DB.delete('emails', id);
+  toast('Deleted');
+  render();
+  renderStats();
+}
+
+function saveDraft() {
+  const id = document.getElementById('campId').value;
+  const data = {
+    subject: document.getElementById('campSubject').value,
+    preview: document.getElementById('campPreview').value,
+    type:    document.getElementById('campType').value,
+    body:    document.getElementById('campBody').value,
+    date:    document.getElementById('campDate').value,
+    time:    document.getElementById('campTime').value,
+    status:  'draft',
+    opens:0, clicks:0, sent:0
+  };
+  if (!data.subject) { toast('Add a subject first', 'error'); return; }
+  if (id) { DB.update('emails', id, data); toast('Draft saved!', 'success'); }
+  else    { DB.add('emails', data);        toast('Draft saved!', 'success'); }
+  closeModal();
+  render();
+}
+
+document.getElementById('emailForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('campId').value;
+  const data = {
+    subject: document.getElementById('campSubject').value,
+    preview: document.getElementById('campPreview').value,
+    type:    document.getElementById('campType').value,
+    body:    document.getElementById('campBody').value,
+    date:    document.getElementById('campDate').value,
+    time:    document.getElementById('campTime').value,
+    status:  'scheduled',
+    opens:0, clicks:0, sent:0
+  };
+  if (id) { DB.update('emails', id, data); toast('Campaign updated!', 'success'); }
+  else    { DB.add('emails', data);        toast('Campaign scheduled!', 'success'); }
+  closeModal();
+  render();
+  renderStats();
+});
+
+renderStats();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Posts — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Social Posts</div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ Schedule Post</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- AutoPilot Banner -->
+      <div style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <strong style="color:var(--accent)">🤖 AI AutoPilot</strong>
+          <span style="font-size:0.875rem;color:var(--text-main);margin-left:8px">Connected to bar-ten-agent — auto-generates & posts daily content</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="badge badge-green">● Active</span>
+          <a href="#" class="btn btn-outline btn-sm">View Schedule</a>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="filterTab('pending',this)">Needs Approval</div>
+        <div class="tab" onclick="filterTab('approved',this)">Approved</div>
+        <div class="tab" onclick="filterTab('posted',this)">Posted</div>
+        <div class="tab" onclick="filterTab('all',this)">All</div>
+      </div>
+
+      <div id="postsList"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Schedule Social Post</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="postForm">
+      <input type="hidden" id="postId">
+      <div class="form-group"><label>Caption</label><textarea id="postCaption" rows="5" required placeholder="Write your post caption..."></textarea></div>
+      <div class="form-group">
+        <label>Post To</label>
+        <div style="display:flex;gap:16px;margin-top:8px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="chkIG" checked style="width:auto"> Instagram</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="chkFB" checked style="width:auto"> Facebook</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Scheduled Date</label><input type="date" id="postDate"></div>
+        <div class="form-group"><label>Scheduled Time</label><input type="time" id="postTime" value="12:00"></div>
+      </div>
+      <div class="form-group"><label>Theme / Campaign</label>
+        <select id="postTheme">
+          <option value="week_opener">Week Opener</option>
+          <option value="happy_hour">Happy Hour</option>
+          <option value="wine_feature">Wine Feature</option>
+          <option value="friday_tease">Friday Tease</option>
+          <option value="tasting_night">Tasting Night</option>
+          <option value="cheese_happy_hour">Cheese Happy Hour</option>
+          <option value="weekend_recap">Weekend Recap</option>
+          <option value="special">Special Promotion</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Post</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('social.html');
+
+// Seed demo posts
+if (DB.get('posts').length === 0) {
+  const today = new Date();
+  const posts = [
+    {
+      caption: "Hey cheese lovers! 🧀 Gather your friends for a delicious experience at our spot. Enjoy grea...",
+      channels: ['Instagram','Facebook'],
+      date: today.toISOString().split('T')[0],
+      time: '12:00',
+      theme: 'cheese_happy_hour',
+      status: 'pending',
+      image: 'GATHER. CONNECT. ENJOY.'
+    },
+    {
+      caption: "Relish the fresh flavors of this colorful salad topped with crisp pita chips for a delig...",
+      channels: ['Instagram','Facebook'],
+      date: new Date(today.getTime() + 86400000).toISOString().split('T')[0],
+      time: '11:30',
+      theme: 'week_opener',
+      status: 'pending',
+      image: null
+    },
+    {
+      caption: "Planning a birthday, rehearsal dinner, anniversary party or business function? Our private dining room ensures that your guests will enjoy a memorable dining experience...",
+      channels: ['Instagram'],
+      date: new Date(today.getTime() + 2*86400000).toISOString().split('T')[0],
+      time: '10:00',
+      theme: 'special',
+      status: 'approved',
+      image: null
+    },
+  ];
+  posts.forEach(p => DB.add('posts', p));
+}
+
+let currentFilter = 'pending';
+
+function filterTab(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  let data = DB.get('posts');
+  if (currentFilter !== 'all') data = data.filter(p => p.status === currentFilter);
+
+  const el = document.getElementById('postsList');
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state card"><div class="empty-state-icon">📱</div><h3>No posts here</h3><p>Schedule a post or let AutoPilot handle it!</p></div>';
+    return;
+  }
+
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:14px">${data.map(p => `
+    <div class="card">
+      <div style="display:flex;gap:16px">
+        <div style="width:80px;height:80px;background:var(--accent-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--accent);font-weight:700;text-align:center;padding:4px;flex-shrink:0">
+          ${p.image || '📸 No Image'}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${p.channels.map(c => `<span class="badge badge-${c==='Instagram'?'blue':'green'}">${c==='Instagram'?'📸':'👍'} ${c}</span>`).join('')}
+              <span class="badge badge-${p.status==='pending'?'yellow':p.status==='approved'?'blue':p.status==='posted'?'green':'gray'}">${p.status}</span>
+            </div>
+            <span style="font-size:0.8rem;color:var(--text-muted)">📅 ${p.date} at ${p.time}</span>
+          </div>
+          <p style="font-size:0.875rem;margin:10px 0;color:var(--text-main)">${p.caption.slice(0,160)}${p.caption.length>160?'...':''}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${p.status === 'pending' ? `
+              <button class="btn btn-sm btn-green" onclick="setStatus('${p.id}','approved')">✓ Approve</button>
+              <button class="btn btn-sm btn-red" onclick="setStatus('${p.id}','rejected')">✗ Reject</button>
+            ` : ''}
+            ${p.status === 'approved' ? `
+              <button class="btn btn-sm btn-primary" onclick="setStatus('${p.id}','posted')">📤 Mark Posted</button>
+            ` : ''}
+            <button class="btn btn-sm btn-outline" onclick="editPost('${p.id}')">Edit</button>
+            <button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="deletePost('${p.id}')">Del</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function setStatus(id, status) {
+  DB.update('posts', id, { status });
+  toast(status === 'approved' ? '✓ Post approved!' : status === 'posted' ? '📤 Marked as posted!' : 'Post rejected', status === 'rejected' ? 'error' : 'success');
+  render();
+}
+
+function openModal(data) {
+  document.getElementById('modal').classList.add('open');
+  if (data) {
+    document.getElementById('modalTitle').textContent = 'Edit Post';
+    document.getElementById('postId').value = data.id;
+    document.getElementById('postCaption').value = data.caption;
+    document.getElementById('chkIG').checked = data.channels.includes('Instagram');
+    document.getElementById('chkFB').checked = data.channels.includes('Facebook');
+    document.getElementById('postDate').value = data.date;
+    document.getElementById('postTime').value = data.time;
+    document.getElementById('postTheme').value = data.theme;
+  } else {
+    document.getElementById('modalTitle').textContent = 'Schedule Social Post';
+    document.getElementById('postForm').reset();
+    document.getElementById('postId').value = '';
+    document.getElementById('chkIG').checked = true;
+    document.getElementById('chkFB').checked = true;
+  }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function editPost(id) { const p = DB.get('posts').find(x=>x.id==id); if(p) openModal(p); }
+
+function deletePost(id) {
+  if (!confirm('Delete this post?')) return;
+  DB.delete('posts', id);
+  toast('Deleted');
+  render();
+}
+
+document.getElementById('postForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('postId').value;
+  const channels = [];
+  if (document.getElementById('chkIG').checked) channels.push('Instagram');
+  if (document.getElementById('chkFB').checked) channels.push('Facebook');
+  const data = {
+    caption:  document.getElementById('postCaption').value,
+    channels,
+    date:     document.getElementById('postDate').value,
+    time:     document.getElementById('postTime').value,
+    theme:    document.getElementById('postTheme').value,
+    status:   'pending',
+  };
+  if (id) { DB.update('posts', id, data); toast('Post updated!', 'success'); }
+  else    { DB.add('posts', data);        toast('Post scheduled!', 'success'); }
+  closeModal();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
