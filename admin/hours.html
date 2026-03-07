@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hours — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar"><div class="topbar-title">Operating Hours</div></div>
+    <div class="content">
+      <div class="card" style="max-width:600px">
+        <div class="card-header"><div class="card-title">Weekly Hours</div></div>
+        <form id="hoursForm">
+          <div id="hoursGrid"></div>
+          <div style="margin-top:24px;display:flex;gap:10px">
+            <button type="submit" class="btn btn-primary">Save Hours</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('hours.html');
+
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DEFAULT = {
+  Monday: { open: '16:00', close: '23:00', closed: false },
+  Tuesday: { open: '16:00', close: '23:00', closed: false },
+  Wednesday: { open: '16:00', close: '23:00', closed: false },
+  Thursday: { open: '16:00', close: '23:00', closed: false },
+  Friday: { open: '16:00', close: '00:00', closed: false },
+  Saturday: { open: '16:00', close: '00:00', closed: false },
+  Sunday: { open: '', close: '', closed: true },
+};
+
+function loadHours() {
+  const saved = localStorage.getItem('bt_hours');
+  return saved ? JSON.parse(saved) : DEFAULT;
+}
+
+function renderForm() {
+  const hours = loadHours();
+  document.getElementById('hoursGrid').innerHTML = DAYS.map(day => {
+    const h = hours[day] || DEFAULT[day];
+    return `
+    <div style="display:grid;grid-template-columns:120px 1fr 1fr 100px;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <strong>${day}</strong>
+      <div class="form-group" style="margin:0">
+        <input type="time" name="${day}_open" value="${h.open}" ${h.closed?'disabled':''} style="width:100%">
+      </div>
+      <div class="form-group" style="margin:0">
+        <input type="time" name="${day}_close" value="${h.close}" ${h.closed?'disabled':''} style="width:100%">
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.875rem;cursor:pointer">
+        <input type="checkbox" name="${day}_closed" ${h.closed?'checked':''} onchange="toggleDay('${day}', this.checked)">
+        Closed
+      </label>
+    </div>`;
+  }).join('');
+}
+
+function toggleDay(day, closed) {
+  const form = document.getElementById('hoursForm');
+  form.querySelector(`[name="${day}_open"]`).disabled = closed;
+  form.querySelector(`[name="${day}_close"]`).disabled = closed;
+}
+
+document.getElementById('hoursForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const hours = {};
+  DAYS.forEach(day => {
+    hours[day] = {
+      open:   form.get(`${day}_open`) || '',
+      close:  form.get(`${day}_close`) || '',
+      closed: !!form.get(`${day}_closed`),
+    };
+  });
+  localStorage.setItem('bt_hours', JSON.stringify(hours));
+  toast('Hours saved!', 'success');
+});
+
+renderForm();
+</script>
+</body>
+</html>

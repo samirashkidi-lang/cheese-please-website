@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Specials — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Specials</div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ Add Special</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="specialsList"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Special</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="specialForm">
+      <input type="hidden" id="specId">
+      <div class="form-group"><label>Special Name</label><input type="text" id="specName" required placeholder="e.g. Wine Down Wednesday"></div>
+      <div class="form-group"><label>Description</label><textarea id="specDesc" rows="3" placeholder="Describe the deal..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Day</label>
+          <select id="specDay">
+            <option>Every Day</option><option>Monday</option><option>Tuesday</option>
+            <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Time</label><input type="text" id="specTime" placeholder="e.g. 4 PM – Close"></div>
+      </div>
+      <div class="form-group"><label>Price / Offer</label><input type="text" id="specPrice" placeholder="e.g. 50% Off Wine"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('specials.html');
+
+if (DB.get('specials').length === 0) {
+  const specials = [
+    { name: 'Hospitality Night',      desc: 'Industry workers get 20% off your entire tab.',               day: 'Tuesday',   time: 'After 7 PM', price: '20% Off' },
+    { name: 'Wine Down Wednesday',    desc: '50% off select bottles and glasses of wine.',                  day: 'Wednesday', time: '4 PM – Close', price: '50% Off Wine' },
+    { name: 'Ladies Night',          desc: 'Ladies get 20% off wine bottles. Plus $4 beers & $6 vodkas.', day: 'Thursday',  time: '4 PM – Close', price: '20% Off + $4 Beers' },
+    { name: 'Wine & Cheese Tasting', desc: '8-course guided tasting experience. 7:00–8:30 PM.',            day: 'Friday',    time: '7:00–8:30 PM', price: 'Reserve Required' },
+    { name: 'Cheese Happy Hour',     desc: 'Discounted cheese flights and wine pours.',                    day: 'Saturday',  time: '4 PM – Close', price: 'Happy Hour Prices' },
+    { name: 'Wings Special',         desc: '5 full wings + fries for just $10.',                           day: 'Every Day', time: 'All Day', price: '$10 All Day' },
+  ];
+  specials.forEach(s => DB.add('specials', s));
+}
+
+function render() {
+  const data = DB.get('specials');
+  const el = document.getElementById('specialsList');
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state card"><div class="empty-state-icon">⭐</div><h3>No specials yet</h3></div>';
+    return;
+  }
+  el.innerHTML = `<div class="grid-3">${data.map(s => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <span class="badge badge-blue">${s.day}</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-outline" onclick="editSpec('${s.id}')">Edit</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="deleteSpec('${s.id}')">Del</button>
+        </div>
+      </div>
+      <h3 style="margin-bottom:6px">${s.name}</h3>
+      <p style="font-size:0.825rem;color:var(--text-muted);margin-bottom:12px">${s.desc}</p>
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem">
+        <span style="color:var(--text-muted)">🕐 ${s.time}</span>
+        <strong style="color:var(--accent)">${s.price}</strong>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function openModal(data) {
+  document.getElementById('modal').classList.add('open');
+  if (data) {
+    document.getElementById('modalTitle').textContent = 'Edit Special';
+    document.getElementById('specId').value = data.id;
+    document.getElementById('specName').value = data.name;
+    document.getElementById('specDesc').value = data.desc;
+    document.getElementById('specDay').value = data.day;
+    document.getElementById('specTime').value = data.time;
+    document.getElementById('specPrice').value = data.price;
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add Special';
+    document.getElementById('specialForm').reset();
+    document.getElementById('specId').value = '';
+  }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function editSpec(id) { const s = DB.get('specials').find(x => x.id==id); if(s) openModal(s); }
+function deleteSpec(id) {
+  if (!confirm('Delete this special?')) return;
+  DB.delete('specials', id);
+  toast('Deleted');
+  render();
+}
+
+document.getElementById('specialForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('specId').value;
+  const data = {
+    name:  document.getElementById('specName').value,
+    desc:  document.getElementById('specDesc').value,
+    day:   document.getElementById('specDay').value,
+    time:  document.getElementById('specTime').value,
+    price: document.getElementById('specPrice').value,
+  };
+  if (id) { DB.update('specials', id, data); toast('Updated!', 'success'); }
+  else    { DB.add('specials', data);        toast('Added!', 'success'); }
+  closeModal();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

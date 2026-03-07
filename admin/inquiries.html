@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inquiries — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Catering & Private Event Inquiries</div>
+    </div>
+    <div class="content">
+      <div class="tabs">
+        <div class="tab active" onclick="filterTab('all',this)">All</div>
+        <div class="tab" onclick="filterTab('new',this)">New</div>
+        <div class="tab" onclick="filterTab('contacted',this)">Contacted</div>
+        <div class="tab" onclick="filterTab('booked',this)">Booked</div>
+      </div>
+      <div id="inquiriesList"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalName"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="setStatus(currentId,'contacted')">Mark Contacted</button>
+      <button class="btn btn-green" onclick="setStatus(currentId,'booked')">✓ Mark Booked</button>
+      <button class="btn btn-outline" style="color:var(--red)" onclick="setStatus(currentId,'cancelled')">Cancel</button>
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+seedDemoData();
+renderSidebar('inquiries.html');
+
+let currentFilter = 'all';
+let currentId = null;
+
+function filterTab(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  let data = DB.get('inquiries');
+  if (currentFilter !== 'all') data = data.filter(i => i.status === currentFilter);
+
+  const el = document.getElementById('inquiriesList');
+  if (!data.length) {
+    el.innerHTML = '<div class="empty-state card"><div class="empty-state-icon">📬</div><h3>No inquiries</h3></div>';
+    return;
+  }
+
+  el.innerHTML = data.map(i => `
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <strong style="font-size:1rem">${i.name}</strong>
+          <span class="badge badge-blue" style="margin-left:8px">${i.type}</span>
+          <span class="badge badge-${i.status==='new'?'yellow':i.status==='booked'?'green':i.status==='cancelled'?'red':'gray'}" style="margin-left:6px">${i.status}</span>
+        </div>
+        <span style="font-size:0.8rem;color:var(--text-muted)">${i.date}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0;font-size:0.825rem">
+        <div><span style="color:var(--text-muted)">Email</span><br>${i.email}</div>
+        <div><span style="color:var(--text-muted)">Phone</span><br>${i.phone}</div>
+        <div><span style="color:var(--text-muted)">Guests</span><br>${i.guests}</div>
+      </div>
+      <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:14px">${i.message}</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-primary" onclick="openModal('${i.id}')">View & Respond</button>
+        <a href="mailto:${i.email}" class="btn btn-sm btn-outline">📧 Email</a>
+        <a href="tel:${i.phone}" class="btn btn-sm btn-outline">📞 Call</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openModal(id) {
+  currentId = id;
+  const i = DB.get('inquiries').find(x => x.id == id);
+  if (!i) return;
+  document.getElementById('modalName').textContent = i.name + ' — ' + i.type;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.875rem">
+      <div><strong>Email:</strong> ${i.email}</div>
+      <div><strong>Phone:</strong> ${i.phone}</div>
+      <div><strong>Event Date:</strong> ${i.date}</div>
+      <div><strong>Guests:</strong> ${i.guests}</div>
+      <div><strong>Type:</strong> ${i.type}</div>
+      <div><strong>Status:</strong> <span class="badge badge-${i.status==='new'?'yellow':'green'}">${i.status}</span></div>
+    </div>
+    <div style="margin-top:14px;padding:14px;background:#f9fafb;border-radius:8px;font-size:0.875rem">
+      <strong>Message:</strong><br>${i.message}
+    </div>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function setStatus(id, status) {
+  DB.update('inquiries', id, { status });
+  toast('Status updated to: ' + status, 'success');
+  closeModal();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

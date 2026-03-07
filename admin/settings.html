@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar"><div class="topbar-title">Settings</div></div>
+    <div class="content">
+      <div style="max-width:700px;display:flex;flex-direction:column;gap:20px">
+
+        <!-- Business Info -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Business Information</div></div>
+          <form id="bizForm">
+            <div class="form-group"><label>Business Name</label><input type="text" id="bizName" value="Bar Ten & Cheese Please"></div>
+            <div class="form-row">
+              <div class="form-group"><label>Phone</label><input type="tel" id="bizPhone" value="(813) 607-2422"></div>
+              <div class="form-group"><label>Email</label><input type="email" id="bizEmail" value="cheesepleasetampa@gmail.com"></div>
+            </div>
+            <div class="form-group"><label>Address</label><input type="text" id="bizAddress" value="4205 S MacDill Ave Suite H, Tampa FL 33611"></div>
+            <div class="form-row">
+              <div class="form-group"><label>Instagram</label><input type="text" id="bizIG" value="@cheesepleasetampa"></div>
+              <div class="form-group"><label>Facebook</label><input type="text" id="bizFB" value="Cheese Please Tampa"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </form>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Text Notifications</div></div>
+          <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:16px">Who gets notified when a new reservation or order comes in?</p>
+          <div id="notifList"></div>
+          <button class="btn btn-outline" style="margin-top:12px" onclick="addNotif()">+ Add Staff Member</button>
+        </div>
+
+        <!-- Users -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Admin Users</div>
+            <button class="btn btn-outline btn-sm" onclick="window.location.href='users.html'">Manage Users</button>
+          </div>
+          <div id="usersList"></div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Change Password</div></div>
+          <form id="pwForm">
+            <div class="form-row">
+              <div class="form-group"><label>New Password</label><input type="password" id="newPw" required></div>
+              <div class="form-group"><label>Confirm Password</label><input type="password" id="confPw" required></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Password</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('settings.html');
+
+const defaultNotifs = [
+  { name: 'Mia',     phone: '(612) 607-4749' },
+  { name: 'Sam',     phone: '(612) 607-2422' },
+  { name: 'Courtney',phone: '(901) 487-0818' },
+];
+
+function renderNotifs() {
+  const notifs = JSON.parse(localStorage.getItem('bt_notifs') || JSON.stringify(defaultNotifs));
+  document.getElementById('notifList').innerHTML = notifs.map((n, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <strong style="width:120px">${n.name}</strong>
+      <span style="color:var(--text-muted)">${n.phone}</span>
+      <button class="btn btn-sm btn-outline" style="margin-left:auto;color:var(--red)" onclick="removeNotif(${i})">Remove</button>
+    </div>
+  `).join('');
+}
+
+function addNotif() {
+  const name  = prompt('Staff name:');
+  const phone = prompt('Phone number:');
+  if (!name || !phone) return;
+  const notifs = JSON.parse(localStorage.getItem('bt_notifs') || JSON.stringify(defaultNotifs));
+  notifs.push({ name, phone });
+  localStorage.setItem('bt_notifs', JSON.stringify(notifs));
+  renderNotifs();
+  toast('Staff member added!', 'success');
+}
+
+function removeNotif(i) {
+  const notifs = JSON.parse(localStorage.getItem('bt_notifs') || JSON.stringify(defaultNotifs));
+  notifs.splice(i, 1);
+  localStorage.setItem('bt_notifs', JSON.stringify(notifs));
+  renderNotifs();
+}
+
+function renderUsers() {
+  const users = [
+    { name: 'Sam', email: 'sam@bartentampa.com', role: 'Owner' },
+    { name: 'Cam', email: 'cheesepleasetampa@gmail.com', role: 'Manager' },
+    { name: 'Courtney Barnes', email: 'amazingguay@gmail.com', role: 'Staff' },
+  ];
+  document.getElementById('usersList').innerHTML = users.map(u => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="width:36px;height:36px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)">${u.name[0]}</div>
+      <div>
+        <strong>${u.name}</strong><br>
+        <span style="font-size:0.8rem;color:var(--text-muted)">${u.email}</span>
+      </div>
+      <span class="badge badge-${u.role==='Owner'?'blue':u.role==='Manager'?'green':'gray'}" style="margin-left:auto">${u.role}</span>
+    </div>
+  `).join('');
+}
+
+document.getElementById('bizForm').addEventListener('submit', e => {
+  e.preventDefault();
+  toast('Business info saved!', 'success');
+});
+
+document.getElementById('pwForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const pw = document.getElementById('newPw').value;
+  const conf = document.getElementById('confPw').value;
+  if (pw !== conf) { toast('Passwords do not match', 'error'); return; }
+  toast('Password updated!', 'success');
+});
+
+renderNotifs();
+renderUsers();
+</script>
+</body>
+</html>

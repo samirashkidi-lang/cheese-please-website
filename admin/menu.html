@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Manager — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Menu Manager</div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ Add Item</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="tabs" id="categoryTabs"></div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Description</th><th>Price</th><th>Category</th><th>Actions</th></tr></thead>
+            <tbody id="menuTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Menu Item</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="menuForm">
+      <input type="hidden" id="itemId">
+      <div class="form-group"><label>Item Name</label><input type="text" id="itemName" required></div>
+      <div class="form-group"><label>Description</label><textarea id="itemDesc" rows="2"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Price</label><input type="text" id="itemPrice" placeholder="$0.00"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="itemCat">
+            <option value="Cheese Flights">Cheese Flights</option>
+            <option value="Charcuterie">Charcuterie</option>
+            <option value="Wine & Drinks">Wine & Drinks</option>
+            <option value="Bar Bites">Bar Bites</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('menu.html');
+
+// Seed menu data
+if (DB.get('menu').length === 0) {
+  const items = [
+    { name: 'Goat Cheese Flight',     desc: '3 selections from France & Spain, paired with honeycomb & crackers', price: '$18', category: 'Cheese Flights' },
+    { name: "Sheep's Milk Flight",    desc: 'Manchego, Pecorino, Ossau-Iraty — aged & fresh varieties',           price: '$20', category: 'Cheese Flights' },
+    { name: "Cow's Milk Flight",      desc: 'Comté, Gruyère, Cheddar — the classics done right',                  price: '$18', category: 'Cheese Flights' },
+    { name: 'Blue Cheese Flight',     desc: 'Roquefort, Gorgonzola, Stilton — bold & beautiful',                  price: '$20', category: 'Cheese Flights' },
+    { name: 'The Grand Board',        desc: "Chef's selection of 5 cheeses + full charcuterie accompaniments",    price: '$42', category: 'Cheese Flights' },
+    { name: 'Build Your Own Flight',  desc: 'Choose any 3 cheeses + 2 accompaniments',                            price: 'from $16', category: 'Cheese Flights' },
+    { name: 'Prosciutto di Parma',    desc: '18-month aged, thinly sliced, imported from Italy',                  price: '$8',  category: 'Charcuterie' },
+    { name: 'Spanish Chorizo',        desc: 'Smoky, paprika-forward cured sausage from Castilla',                 price: '$7',  category: 'Charcuterie' },
+    { name: 'Marcona Almonds',        desc: 'Roasted in olive oil & sea salt',                                    price: '$5',  category: 'Charcuterie' },
+    { name: 'Honeycomb',             desc: 'Wild-harvest honeycomb',                                              price: '$4',  category: 'Charcuterie' },
+    { name: 'Wine by the Glass',      desc: 'Rotating selection of 12 reds, whites & rosés',                     price: '$9–$16', category: 'Wine & Drinks' },
+    { name: 'Wine by the Bottle',     desc: 'Curated cellar list',                                               price: '$28–$95', category: 'Wine & Drinks' },
+    { name: 'Craft Cocktails',        desc: 'Seasonal cocktails made with premium spirits',                       price: '$11–$14', category: 'Wine & Drinks' },
+    { name: 'Draft Beers',           desc: 'Local and imported craft beers on tap',                              price: '$5–$8', category: 'Wine & Drinks' },
+    { name: 'Wings Special',         desc: '5 full wings + fries — all day, every day',                          price: '$10', category: 'Bar Bites' },
+    { name: 'Grilled Cheese Sandwich',desc: 'Made with your choice of premium imported cheese on sourdough',     price: '$12', category: 'Bar Bites' },
+    { name: 'Cheese Curds',          desc: 'Fried beer-battered, served with house marinara',                   price: '$10', category: 'Bar Bites' },
+  ];
+  items.forEach(i => DB.add('menu', i));
+}
+
+const CATEGORIES = ['All', 'Cheese Flights', 'Charcuterie', 'Wine & Drinks', 'Bar Bites'];
+let activeCategory = 'All';
+
+function renderTabs() {
+  document.getElementById('categoryTabs').innerHTML = CATEGORIES.map(c =>
+    `<div class="tab ${c===activeCategory?'active':''}" onclick="setCategory('${c}')">${c}</div>`
+  ).join('');
+}
+
+function setCategory(c) {
+  activeCategory = c;
+  renderTabs();
+  renderTable();
+}
+
+function renderTable() {
+  let data = DB.get('menu');
+  if (activeCategory !== 'All') data = data.filter(i => i.category === activeCategory);
+
+  const tbody = document.getElementById('menuTable');
+  tbody.innerHTML = data.map(i => `
+    <tr>
+      <td><strong>${i.name}</strong></td>
+      <td style="font-size:0.825rem;color:var(--text-muted)">${i.desc}</td>
+      <td><strong>${i.price}</strong></td>
+      <td><span class="badge badge-blue">${i.category}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-outline" onclick="editItem('${i.id}')">Edit</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="deleteItem('${i.id}')">Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openModal(data) {
+  document.getElementById('modal').classList.add('open');
+  if (data) {
+    document.getElementById('modalTitle').textContent = 'Edit Menu Item';
+    document.getElementById('itemId').value = data.id;
+    document.getElementById('itemName').value = data.name;
+    document.getElementById('itemDesc').value = data.desc;
+    document.getElementById('itemPrice').value = data.price;
+    document.getElementById('itemCat').value = data.category;
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add Menu Item';
+    document.getElementById('menuForm').reset();
+    document.getElementById('itemId').value = '';
+  }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function editItem(id) {
+  const item = DB.get('menu').find(i => i.id == id);
+  if (item) openModal(item);
+}
+
+function deleteItem(id) {
+  if (!confirm('Delete this item?')) return;
+  DB.delete('menu', id);
+  toast('Item deleted');
+  renderTable();
+}
+
+document.getElementById('menuForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('itemId').value;
+  const data = {
+    name:     document.getElementById('itemName').value,
+    desc:     document.getElementById('itemDesc').value,
+    price:    document.getElementById('itemPrice').value,
+    category: document.getElementById('itemCat').value,
+  };
+  if (id) { DB.update('menu', id, data); toast('Item updated!', 'success'); }
+  else    { DB.add('menu', data);        toast('Item added!', 'success'); }
+  closeModal();
+  renderTable();
+});
+
+renderTabs();
+renderTable();
+</script>
+</body>
+</html>

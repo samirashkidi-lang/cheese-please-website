@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reservations — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Reservations</div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ Add Reservation</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="tabs">
+        <div class="tab active" onclick="filterTab('all', this)">All</div>
+        <div class="tab" onclick="filterTab('pending', this)">Pending</div>
+        <div class="tab" onclick="filterTab('confirmed', this)">Confirmed</div>
+        <div class="tab" onclick="filterTab('cancelled', this)">Cancelled</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="tableTitle">All Reservations</div>
+          </div>
+          <input type="text" id="searchInput" placeholder="Search by name..." style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.875rem;width:220px" oninput="renderTable()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Date & Time</th>
+                <th>Party</th>
+                <th>Occasion</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="resTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Reservation</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <form id="resForm">
+      <input type="hidden" id="resId">
+      <div class="form-row">
+        <div class="form-group"><label>Name</label><input type="text" id="resName" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="resEmail"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone</label><input type="tel" id="resPhone"></div>
+        <div class="form-group"><label>Party Size</label><input type="number" id="resParty" min="1" max="20"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date</label><input type="date" id="resDate" required></div>
+        <div class="form-group"><label>Time</label>
+          <select id="resTime">
+            <option>4:00 PM</option><option>5:00 PM</option><option>6:00 PM</option>
+            <option>7:00 PM — Tasting Night</option><option>8:00 PM</option><option>9:00 PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Occasion</label>
+          <select id="resOccasion">
+            <option>Just a night out</option><option>Date Night</option><option>Birthday</option>
+            <option>Anniversary</option><option>Girls Night</option><option>Work Event</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Status</label>
+          <select id="resStatus">
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="resNotes" rows="2"></textarea></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Reservation</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+seedDemoData();
+renderSidebar('reservations.html');
+
+let currentFilter = 'all';
+
+function filterTab(status, el) {
+  currentFilter = status;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let data = DB.get('reservations');
+  if (currentFilter !== 'all') data = data.filter(r => r.status === currentFilter);
+  if (search) data = data.filter(r => r.name.toLowerCase().includes(search));
+
+  const tbody = document.getElementById('resTable');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">No reservations found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><strong>${r.name}</strong></td>
+      <td style="font-size:0.8rem">${r.email || ''}<br>${r.phone || ''}</td>
+      <td><strong>${r.date}</strong><br><span style="font-size:0.8rem;color:var(--text-muted)">${r.time}</span></td>
+      <td>${r.party_size} guests</td>
+      <td>${r.occasion || '—'}</td>
+      <td><span class="badge badge-${r.status==='confirmed'?'green':r.status==='cancelled'?'red':'yellow'}">${r.status}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${r.status==='pending' ? `
+            <button class="btn btn-sm btn-green" onclick="updateStatus('${r.id}','confirmed')">✓ Confirm</button>
+            <button class="btn btn-sm btn-red" onclick="updateStatus('${r.id}','cancelled')">✗</button>
+          ` : ''}
+          <button class="btn btn-sm btn-outline" onclick="editRes('${r.id}')">Edit</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--red)" onclick="deleteRes('${r.id}')">Del</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function updateStatus(id, status) {
+  DB.update('reservations', id, { status });
+  toast(status === 'confirmed' ? '✓ Reservation confirmed!' : 'Reservation cancelled', status === 'confirmed' ? 'success' : 'error');
+  renderTable();
+  renderSidebar('reservations.html'); // refresh badges
+}
+
+function deleteRes(id) {
+  if (!confirm('Delete this reservation?')) return;
+  DB.delete('reservations', id);
+  toast('Deleted');
+  renderTable();
+}
+
+function openModal(data) {
+  document.getElementById('modal').classList.add('open');
+  if (data) {
+    document.getElementById('modalTitle').textContent = 'Edit Reservation';
+    document.getElementById('resId').value = data.id;
+    document.getElementById('resName').value = data.name;
+    document.getElementById('resEmail').value = data.email || '';
+    document.getElementById('resPhone').value = data.phone || '';
+    document.getElementById('resParty').value = data.party_size;
+    document.getElementById('resDate').value = data.date;
+    document.getElementById('resTime').value = data.time;
+    document.getElementById('resOccasion').value = data.occasion || 'Just a night out';
+    document.getElementById('resStatus').value = data.status;
+    document.getElementById('resNotes').value = data.notes || '';
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add Reservation';
+    document.getElementById('resForm').reset();
+    document.getElementById('resId').value = '';
+  }
+}
+
+function editRes(id) {
+  const r = DB.get('reservations').find(r => r.id == id);
+  if (r) openModal(r);
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+document.getElementById('resForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = document.getElementById('resId').value;
+  const data = {
+    name: document.getElementById('resName').value,
+    email: document.getElementById('resEmail').value,
+    phone: document.getElementById('resPhone').value,
+    party_size: document.getElementById('resParty').value,
+    date: document.getElementById('resDate').value,
+    time: document.getElementById('resTime').value,
+    occasion: document.getElementById('resOccasion').value,
+    status: document.getElementById('resStatus').value,
+    notes: document.getElementById('resNotes').value,
+  };
+  if (id) {
+    DB.update('reservations', id, data);
+    toast('Reservation updated!', 'success');
+  } else {
+    DB.add('reservations', data);
+    toast('Reservation added!', 'success');
+  }
+  closeModal();
+  renderTable();
+});
+
+renderTable();
+</script>
+</body>
+</html>

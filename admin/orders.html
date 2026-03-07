@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">Online Orders</div>
+    </div>
+    <div class="content">
+      <div class="tabs">
+        <div class="tab active" onclick="filterTab('all',this)">All Orders</div>
+        <div class="tab" onclick="filterTab('pending',this)">Pending</div>
+        <div class="tab" onclick="filterTab('accepted',this)">Accepted</div>
+        <div class="tab" onclick="filterTab('rejected',this)">Rejected</div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Customer</th><th>Items</th><th>Received</th><th>Requested</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="ordersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+seedDemoData();
+renderSidebar('orders.html');
+
+let currentFilter = 'all';
+
+function filterTab(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  let data = DB.get('orders');
+  if (currentFilter !== 'all') data = data.filter(o => o.status === currentFilter);
+
+  const tbody = document.getElementById('ordersTable');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">No orders found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(o => `
+    <tr>
+      <td><strong>${o.name}</strong></td>
+      <td style="font-size:0.825rem">${o.items}</td>
+      <td style="font-size:0.825rem">${formatDate(o.createdAt)}<br>${formatTime(o.createdAt)}</td>
+      <td style="font-size:0.825rem">ASAP</td>
+      <td><strong>${formatMoney(o.amount)}</strong></td>
+      <td><span class="badge badge-${o.status==='accepted'?'green':o.status==='rejected'?'red':'yellow'}">${o.status}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${o.status==='pending' ? `
+            <button class="btn btn-sm btn-green" onclick="setStatus('${o.id}','accepted')">✓ Accept</button>
+            <button class="btn btn-sm btn-red" onclick="setStatus('${o.id}','rejected')">✗ Reject</button>
+          ` : `<span style="font-size:0.8rem;color:var(--text-muted)">${o.status}</span>`}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function setStatus(id, status) {
+  DB.update('orders', id, { status });
+  toast(status === 'accepted' ? '✓ Order accepted!' : 'Order rejected', status === 'accepted' ? 'success' : 'error');
+  renderTable();
+}
+
+renderTable();
+</script>
+</body>
+</html>

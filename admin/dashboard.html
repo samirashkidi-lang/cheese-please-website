@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar injected by JS -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-badge">🟢 Site Live</span>
+        <a href="/" target="_blank" class="btn btn-outline btn-sm">View Website →</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <!-- Main grid -->
+      <div class="grid-2" style="margin-bottom:20px">
+
+        <!-- Recent Reservations -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Recent Reservations</div>
+              <div class="card-subtitle">Pending action first</div>
+            </div>
+            <a href="reservations.html" class="btn btn-outline btn-sm">View All</a>
+          </div>
+          <div class="table-wrap">
+            <table id="dashReservations">
+              <thead><tr><th>Name</th><th>Date</th><th>Party</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Recent Orders</div>
+              <div class="card-subtitle">Online & catering orders</div>
+            </div>
+            <a href="orders.html" class="btn btn-outline btn-sm">View All</a>
+          </div>
+          <div class="table-wrap">
+            <table id="dashOrders">
+              <thead><tr><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Inquiries + Quick Actions -->
+      <div class="grid-2">
+
+        <!-- New Inquiries -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">New Inquiries</div>
+              <div class="card-subtitle">Catering & private events</div>
+            </div>
+            <a href="inquiries.html" class="btn btn-outline btn-sm">View All</a>
+          </div>
+          <div id="dashInquiries"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Quick Actions</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <a href="reservations.html" class="btn btn-primary">📅 Manage Reservations</a>
+            <a href="specials.html" class="btn btn-outline">⭐ Update Specials</a>
+            <a href="menu.html" class="btn btn-outline">🧀 Edit Menu</a>
+            <a href="events.html" class="btn btn-outline">🎉 Add Event</a>
+            <a href="social.html" class="btn btn-outline">📱 Schedule Social Post</a>
+            <a href="hours.html" class="btn btn-outline">🕐 Update Hours</a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="admin.js"></script>
+<script>
+requireAuth();
+seedDemoData();
+renderSidebar('dashboard.html');
+
+// Stats
+function renderStats() {
+  const reservations = DB.get('reservations');
+  const orders = DB.get('orders');
+  const inquiries = DB.get('inquiries');
+  const pending = reservations.filter(r => r.status === 'pending').length;
+  const totalRevenue = orders.reduce((s, o) => s + (o.amount || 0), 0);
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-label">Total Reservations</div>
+      <div class="stat-value">${reservations.length}</div>
+      <div class="stat-change up">${pending} pending action</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🛒</div>
+      <div class="stat-label">Total Orders</div>
+      <div class="stat-value">${orders.length}</div>
+      <div class="stat-change up">${orders.filter(o=>o.status==='accepted').length} accepted</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-label">Revenue (Orders)</div>
+      <div class="stat-value">${formatMoney(totalRevenue)}</div>
+      <div class="stat-change up">↑ from orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📬</div>
+      <div class="stat-label">New Inquiries</div>
+      <div class="stat-value">${inquiries.filter(i=>i.status==='new').length}</div>
+      <div class="stat-change yellow">Needs response</div>
+    </div>
+  `;
+}
+
+// Reservations table
+function renderReservations() {
+  const rows = DB.get('reservations').slice(0, 5);
+  const tbody = document.querySelector('#dashReservations tbody');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><strong>${r.name}</strong><br><span style="font-size:0.75rem;color:var(--text-muted)">${r.occasion || ''}</span></td>
+      <td>${r.date}<br><span style="font-size:0.75rem;color:var(--text-muted)">${r.time}</span></td>
+      <td>${r.party_size} guests</td>
+      <td><span class="badge badge-${r.status==='confirmed'?'green':r.status==='cancelled'?'red':'yellow'}">${r.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// Orders table
+function renderOrders() {
+  const rows = DB.get('orders').slice(0, 5);
+  const tbody = document.querySelector('#dashOrders tbody');
+  tbody.innerHTML = rows.map(o => `
+    <tr>
+      <td><strong>${o.name}</strong><br><span style="font-size:0.75rem;color:var(--text-muted)">${o.items}</span></td>
+      <td>${formatMoney(o.amount)}</td>
+      <td><span class="badge badge-${o.status==='accepted'?'green':o.status==='rejected'?'red':'yellow'}">${o.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+// Inquiries
+function renderInquiries() {
+  const items = DB.get('inquiries').filter(i => i.status === 'new');
+  const el = document.getElementById('dashInquiries');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📬</div><h3>No new inquiries</h3></div>';
+    return;
+  }
+  el.innerHTML = items.map(i => `
+    <div style="padding:14px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <strong>${i.name}</strong>
+          <span class="badge badge-blue" style="margin-left:8px">${i.type}</span>
+        </div>
+        <span style="font-size:0.75rem;color:var(--text-muted)">${i.date}</span>
+      </div>
+      <div style="font-size:0.825rem;color:var(--text-muted);margin-top:4px">${i.message?.slice(0,80)}...</div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <a href="inquiries.html" class="btn btn-sm btn-primary">Respond</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderStats();
+renderReservations();
+renderOrders();
+renderInquiries();
+</script>
+</body>
+</html>
