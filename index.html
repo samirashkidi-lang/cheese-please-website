@@ -58,15 +58,17 @@
 <nav class="nav" id="nav">
   <div class="container">
     <a href="/" class="nav-logo">
-      <span class="nav-logo-main">Bar Ten &amp; Cheese Please</span>
-      <span class="nav-logo-sub">South Tampa · Est. 2018</span>
+      <span class="nav-logo-main">Cheese<em>please</em></span>
+      <span class="nav-logo-badge">Bar Ten</span>
     </a>
     <div class="nav-links" id="navLinks">
-      <a href="#specials">Specials</a>
       <a href="#menu">Menu</a>
+      <a href="#specials">Specials</a>
       <a href="#events">Events</a>
-      <a href="#catering">Private Events</a>
-      <a href="#reservation" class="btn btn-outline">Reserve a Table</a>
+      <a href="#reservation">Reserve</a>
+      <a href="#catering">Parties</a>
+      <a href="#catering">Catering</a>
+      <a href="#reservation" class="btn btn-primary">Order Online</a>
     </div>
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
       <span></span><span></span><span></span>
@@ -150,48 +152,61 @@
   <div class="container">
     <span class="section-label">Deals &amp; Specials</span>
     <h2 style="color:var(--cream); margin-bottom:48px">Every Night Has a Reason to Come In</h2>
-    <div class="specials-grid">
+    <div class="specials-list">
 
-      <div class="special-card">
-        <div class="special-day">Tuesday – Wednesday</div>
-        <div class="special-name">Hospitality Night</div>
-        <div class="special-desc">Industry workers and hospitality staff get 20% off your entire tab. You work hard — come unwind with us.</div>
-        <span class="special-price">20% Off</span>
+      <div class="special-row">
+        <div class="special-img" style="background-image:url('images/food-2.jpg')"></div>
+        <div class="special-info">
+          <div class="special-day">Saturday</div>
+          <div class="special-name">$4 Beer All Day Long</div>
+          <div class="special-desc">Cold beers for just $4 all day long. Pair it with our famous wings and you've got yourself the perfect Saturday night in South Tampa.</div>
+          <div class="special-meta">📍 4205 S MacDill Ave · <span>4:00 PM – 12:00 AM</span></div>
+          <span class="special-price">$4 Beers</span>
+        </div>
       </div>
 
-      <div class="special-card">
-        <div class="special-day">Wednesday</div>
-        <div class="special-name">Wine Down Wednesday</div>
-        <div class="special-desc">50% off select bottles and glasses of wine. The perfect mid-week escape with someone you love.</div>
-        <span class="special-price">50% Off Wine</span>
+      <div class="special-row reverse">
+        <div class="special-img" style="background-image:url('images/food-3.jpg')"></div>
+        <div class="special-info">
+          <div class="special-day">Monday</div>
+          <div class="special-name">Hospitality Night</div>
+          <div class="special-desc">25% OFF your entire bill for hospitality industry workers after 7PM. You work hard — come unwind with us.</div>
+          <div class="special-meta">🕐 <span>7:00 PM – 11:00 PM</span></div>
+          <span class="special-price">25% Off</span>
+        </div>
       </div>
 
-      <div class="special-card">
-        <div class="special-day">Thursday</div>
-        <div class="special-name">Ladies Night</div>
-        <div class="special-desc">Ladies get 20% off wine bottles all night. Plus $4 beers, $4 High Noon &amp; Nütrl's, and $6 vodka drinks.</div>
-        <span class="special-price">20% Off + $4 Beers</span>
+      <div class="special-row">
+        <div class="special-img" style="background-image:url('images/food-1.jpg')"></div>
+        <div class="special-info">
+          <div class="special-day">Tuesday</div>
+          <div class="special-name">Happy Hour Wings Special</div>
+          <div class="special-desc">Five full wings with fries for just $10 all day. The best deal in South Tampa — every single Tuesday.</div>
+          <div class="special-meta">🕐 <span>4:00 PM – 11:00 PM</span></div>
+          <span class="special-price">$10 Wings + Fries</span>
+        </div>
       </div>
 
-      <div class="special-card">
-        <div class="special-day">Friday</div>
-        <div class="special-name">Wine &amp; Cheese Tasting Night</div>
-        <div class="special-desc">An 8-course guided tasting experience — rare cheeses, perfect pairings, and great stories. 7:00–8:30 PM. Book in advance.</div>
-        <span class="special-price">Reserve Required</span>
+      <div class="special-row reverse">
+        <div class="special-img" style="background-image:url('images/food-5.jpg')"></div>
+        <div class="special-info">
+          <div class="special-day">Wednesday</div>
+          <div class="special-name">Wine Down Wednesday</div>
+          <div class="special-desc">30% off select wines. The perfect mid-week escape — grab a glass, build a board, and let the week melt away.</div>
+          <div class="special-meta">🕐 <span>7:00 PM – 11:00 PM</span></div>
+          <span class="special-price">30% Off Wine</span>
+        </div>
       </div>
 
-      <div class="special-card">
-        <div class="special-day">Saturday</div>
-        <div class="special-name">Cheese Happy Hour</div>
-        <div class="special-desc">Discounted cheese flights and wine pours all evening. The best-kept secret in South Tampa.</div>
-        <span class="special-price">Happy Hour Prices</span>
-      </div>
-
-      <div class="special-card">
-        <div class="special-day">Every Day</div>
-        <div class="special-name">Wings Special</div>
-        <div class="special-desc">5 full wings + fries for just $10 all day, every day. Pair them with a craft beer or cocktail.</div>
-        <span class="special-price">$10 All Day</span>
+      <div class="special-row">
+        <div class="special-img" style="background-image:url('images/food-6.jpg')"></div>
+        <div class="special-info">
+          <div class="special-day">Friday</div>
+          <div class="special-name">Wine &amp; Cheese Tasting Night</div>
+          <div class="special-desc">An intimate 8-course guided tasting experience. Rare imported cheeses paired with hand-selected wines. 7:00–8:30 PM. Book in advance.</div>
+          <div class="special-meta">🕐 <span>7:00 PM – 8:30 PM · Reservations Required</span></div>
+          <a href="#reservation" class="special-price" style="text-decoration:none">Reserve Now →</a>
+        </div>
       </div>
 
     </div>
