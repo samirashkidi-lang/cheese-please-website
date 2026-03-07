@@ -140,9 +140,7 @@
       </div>
     </div>
     <div class="about-image">
-      <div class="about-image-placeholder">
-        📸 Add your best<br>cheese board photo here
-      </div>
+      <img src="images/food-1.jpg" alt="Cheese and charcuterie board at Bar Ten Tampa" style="width:100%;height:100%;object-fit:cover;border-radius:12px">
     </div>
   </div>
 </section>
@@ -192,9 +190,9 @@
         <div class="special-info">
           <div class="special-day">Wednesday</div>
           <div class="special-name">Wine Down Wednesday</div>
-          <div class="special-desc">30% off select wines. The perfect mid-week escape — grab a glass, build a board, and let the week melt away.</div>
+          <div class="special-desc">50% off select wines. The perfect mid-week escape — grab a glass, build a board, and let the week melt away.</div>
           <div class="special-meta">🕐 <span>7:00 PM – 11:00 PM</span></div>
-          <span class="special-price">30% Off Wine</span>
+          <span class="special-price">50% Off Wine</span>
         </div>
       </div>
 
@@ -225,6 +223,7 @@
 
     <div class="menu-tabs">
       <button class="menu-tab active" data-tab="cheese">Cheese Flights</button>
+      <button class="menu-tab" data-tab="boards">BYO Boards</button>
       <button class="menu-tab" data-tab="charcuterie">Charcuterie</button>
       <button class="menu-tab" data-tab="drinks">Drinks</button>
       <button class="menu-tab" data-tab="food">Bar Bites</button>
@@ -237,6 +236,57 @@
       <div class="menu-item"><div class="menu-item-info"><h4>Blue Cheese Flight</h4><p>Roquefort, Gorgonzola, Stilton — bold &amp; beautiful</p></div><div class="menu-item-price">$20</div></div>
       <div class="menu-item"><div class="menu-item-info"><h4>The Grand Board</h4><p>Chef's selection of 5 cheeses + full charcuterie accompaniments</p></div><div class="menu-item-price">$42</div></div>
       <div class="menu-item"><div class="menu-item-info"><h4>Build Your Own Flight</h4><p>Choose any 3 cheeses + 2 accompaniments</p></div><div class="menu-item-price">from $16</div></div>
+    </div>
+
+    <div class="menu-panel" id="tab-boards">
+      <div class="byo-grid">
+        <div class="byo-card">
+          <div class="byo-img" style="background-image:url('images/food-4.jpg')"></div>
+          <div class="byo-info">
+            <div class="byo-title-row"><h4>X-Small</h4><span class="byo-price">$65</span></div>
+            <div class="byo-size">12 inches</div>
+            <p>Feeds 2–3 People · 2 Cheeses | 1 Meat | 1 Jelly | Fruit | Olives | Cornichon</p>
+            <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+          </div>
+        </div>
+        <div class="byo-card">
+          <div class="byo-img" style="background-image:url('images/food-7.jpg')"></div>
+          <div class="byo-info">
+            <div class="byo-title-row"><h4>Small</h4><span class="byo-price">$90</span></div>
+            <div class="byo-size">12 inches</div>
+            <p>Feeds 4–6 People · 3 Cheeses | 2 Meats | 2 Jellies | Fruit | Olives | Cornichon</p>
+            <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+          </div>
+        </div>
+        <div class="byo-card">
+          <div class="byo-img" style="background-image:url('images/food-8.jpg')"></div>
+          <div class="byo-info">
+            <div class="byo-title-row"><h4>Medium</h4><span class="byo-price">$140</span></div>
+            <div class="byo-size">16 inches</div>
+            <p>Feeds 6–8 People · 4 Cheeses | 3 Meats | 3 Jellies | Fruit | Olives | Cornichon</p>
+            <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+          </div>
+        </div>
+        <div class="byo-card">
+          <div class="byo-img" style="background-image:url('images/food-9.jpg')"></div>
+          <div class="byo-info">
+            <div class="byo-title-row"><h4>Large</h4><span class="byo-price">$185</span></div>
+            <div class="byo-size">18 inches</div>
+            <p>Feeds 8–10 People · 5 Cheeses | 4 Meats | 3 Jellies | Fruit | Olives | Cornichon</p>
+            <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+          </div>
+        </div>
+        <div class="byo-card byo-card-wide">
+          <div class="byo-img" style="background-image:url('images/food-10.jpg')"></div>
+          <div class="byo-info">
+            <div class="byo-title-row"><h4>X-Large</h4><span class="byo-price">$225</span></div>
+            <div class="byo-size">18 inches</div>
+            <p>Feeds 10–15 People · 6 Cheeses | 5 Meats | 5 Jellies | Fruit | Olives | Cornichon</p>
+            <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+          </div>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);margin-top:24px;font-size:0.9rem">Call ahead or order online to have your board ready when you arrive.</p>
     </div>
 
     <div class="menu-panel" id="tab-charcuterie">
@@ -545,7 +595,7 @@
             🕐 Fri–Sat: 4:00 PM – 12:00 AM<br>
             ❌ Sunday: Closed
           </p>
-          <p style="margin-top:16px">📱 Follow us: <a href="https://instagram.com/cheesepleasetampa" style="color:var(--gold)">@cheesepleasetampa</a></p>
+          <p style="margin-top:16px">📱 Follow us: <a href="https://instagram.com/bartentampa" style="color:var(--gold)">@bartentampa</a></p>
         </div>
         <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap">
           <a href="https://maps.google.com/?q=4205+S+MacDill+Ave+Tampa+FL" target="_blank" class="btn btn-primary">Get Directions</a>
