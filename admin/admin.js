@@ -2,6 +2,42 @@
    Bar Ten Admin — Shared JS
    ═══════════════════════════════════════════ */
 
+// ─── SUPABASE CONFIG ──────────────────────
+const SUPABASE_URL = 'https://rhlbnqpljkcbggtmoldz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_DGyrcJ_OvzPxCPQkTLFLPQ_nzviID_M';
+
+// Supabase REST API helper
+const SB = {
+  async get(table, filters = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?order=created_at.desc${filters}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.json();
+  },
+  async insert(table, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+  async update(table, id, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+  async delete(table, id) {
+    await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+  }
+};
+
 // Auth guard — redirect to login if not authenticated
 function requireAuth() {
   if (!sessionStorage.getItem('admin_user')) {
