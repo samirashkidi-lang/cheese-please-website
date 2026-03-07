@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscribers — Bar Ten Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<script src="admin.js"></script>
+<script>
+requireAuth();
+renderSidebar('subscribers.html');
+setActiveNav();
+showUser();
+</script>
+
+<div class="main">
+  <div class="main-header">
+    <div>
+      <h1 class="page-title">VIP Subscribers</h1>
+      <p class="page-sub">All customers who signed up for your VIP list</p>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <span class="stat-badge" id="totalCount">Loading...</span>
+      <button class="btn-action" onclick="exportCSV()">Export CSV</button>
+      <button class="btn-action btn-primary" onclick="openBlast()">Send Blast</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" style="margin-bottom:24px">
+    <div class="stat-card">
+      <div class="stat-val" id="statTotal">—</div>
+      <div class="stat-lbl">Total Subscribers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statPhone">—</div>
+      <div class="stat-lbl">Have Phone Numbers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statWeek">—</div>
+      <div class="stat-lbl">Joined This Week</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statMonth">—</div>
+      <div class="stat-lbl">Joined This Month</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="toolbar" style="margin-bottom:16px">
+    <input type="text" id="searchInput" placeholder="Search by name, email or phone..." oninput="filterSubs()" style="padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#fff;font-size:0.9rem;width:320px">
+    <span style="color:rgba(255,255,255,0.5);font-size:0.85rem" id="searchCount"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table class="data-table" id="subsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Source</th>
+          <th>Joined</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="subsBody">
+        <tr><td colspan="7" style="text-align:center;padding:40px;color:rgba(255,255,255,0.4)">Loading subscribers...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Send Blast Modal -->
+<div class="modal-overlay" id="blastModal" style="display:none">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <h3>Send Message Blast</h3>
+      <button onclick="closeBlast()" class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Send To</label>
+        <select id="blastType" style="width:100%;padding:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff">
+          <option value="all">All Subscribers</option>
+          <option value="email">Email Only</option>
+          <option value="phone">Has Phone Number</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Subject (for email)</label>
+        <input type="text" id="blastSubject" placeholder="e.g. Tonight: $4 Beers All Night!" style="width:100%;padding:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff">
+      </div>
+      <div class="form-group" style="margin-bottom:20px">
+        <label>Message</label>
+        <textarea id="blastMsg" rows="5" placeholder="Write your message here..." style="width:100%;padding:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;resize:vertical"></textarea>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:flex-end">
+        <button onclick="closeBlast()" class="btn-action">Cancel</button>
+        <button onclick="sendBlast()" class="btn-action btn-primary">Send Blast</button>
+      </div>
+      <p style="font-size:0.78rem;color:rgba(255,255,255,0.4);margin-top:12px">Email sending requires email provider setup. SMS requires Twilio setup.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let allSubs = [];
+
+async function loadSubs() {
+  try {
+    const data = await SB.get('subscribers');
+    allSubs = data || [];
+    renderStats();
+    renderTable(allSubs);
+  } catch(e) {
+    document.getElementById('subsBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:rgba(255,100,100,0.7)">Could not load subscribers. Check Supabase connection.</td></tr>';
+  }
+}
+
+function renderStats() {
+  const now = new Date();
+  const weekAgo  = new Date(now - 7 * 86400000);
+  const monthAgo = new Date(now - 30 * 86400000);
+
+  document.getElementById('statTotal').textContent  = allSubs.length;
+  document.getElementById('statPhone').textContent  = allSubs.filter(s => s.phone).length;
+  document.getElementById('statWeek').textContent   = allSubs.filter(s => new Date(s.created_at) > weekAgo).length;
+  document.getElementById('statMonth').textContent  = allSubs.filter(s => new Date(s.created_at) > monthAgo).length;
+  document.getElementById('totalCount').textContent = `${allSubs.length} subscribers`;
+}
+
+function renderTable(subs) {
+  const tbody = document.getElementById('subsBody');
+  if (!subs.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:rgba(255,255,255,0.4)">No subscribers yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = subs.map((s, i) => `
+    <tr>
+      <td style="color:rgba(255,255,255,0.4)">${i + 1}</td>
+      <td><strong>${s.name || '—'}</strong></td>
+      <td><a href="mailto:${s.email}" style="color:#e84455">${s.email}</a></td>
+      <td>${s.phone ? `<a href="tel:${s.phone}" style="color:rgba(255,255,255,0.7)">${s.phone}</a>` : '<span style="color:rgba(255,255,255,0.3)">—</span>'}</td>
+      <td><span class="badge">${s.source || 'website'}</span></td>
+      <td style="color:rgba(255,255,255,0.5);font-size:0.82rem">${formatDate(s.created_at)}</td>
+      <td>
+        <button onclick="deleteSub('${s.id}', '${s.email}')" style="background:none;border:none;color:rgba(255,80,80,0.6);cursor:pointer;font-size:0.8rem">Remove</button>
+      </td>
+    </tr>
+  `).join('');
+  document.getElementById('searchCount').textContent = subs.length !== allSubs.length ? `${subs.length} of ${allSubs.length}` : '';
+}
+
+function filterSubs() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  if (!q) { renderTable(allSubs); return; }
+  renderTable(allSubs.filter(s =>
+    (s.name||'').toLowerCase().includes(q) ||
+    (s.email||'').toLowerCase().includes(q) ||
+    (s.phone||'').includes(q)
+  ));
+}
+
+async function deleteSub(id, email) {
+  if (!confirm(`Remove ${email} from VIP list?`)) return;
+  await SB.delete('subscribers', id);
+  allSubs = allSubs.filter(s => s.id !== id);
+  renderStats();
+  filterSubs();
+  toast('Subscriber removed');
+}
+
+function exportCSV() {
+  const rows = [['Name','Email','Phone','Source','Joined']];
+  allSubs.forEach(s => rows.push([s.name||'', s.email||'', s.phone||'', s.source||'website', s.created_at ? new Date(s.created_at).toLocaleDateString() : '']));
+  const csv  = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `bartenten-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  toast('CSV downloaded!');
+}
+
+function openBlast()  { document.getElementById('blastModal').style.display = 'flex'; }
+function closeBlast() { document.getElementById('blastModal').style.display = 'none'; }
+
+function sendBlast() {
+  const msg = document.getElementById('blastMsg').value.trim();
+  if (!msg) { toast('Please write a message first', 'error'); return; }
+  toast('Blast sent! (Email/SMS provider needed for live sends)');
+  closeBlast();
+}
+
+loadSubs();
+</script>
+</body>
+</html>

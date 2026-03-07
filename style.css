@@ -483,6 +483,65 @@ textarea { resize: vertical; min-height: 100px; }
 .catering-card h3 { margin-bottom: 8px; color: var(--cream); }
 .catering-card p { color: rgba(240,230,211,0.65); font-size: 0.88rem; margin-bottom: 20px; }
 
+/* ─── VIP SIGNUP ──────────────────────────────────────────── */
+.vip-signup {
+  background: linear-gradient(135deg, #1a0818 0%, #0d060c 50%, #1a0818 100%);
+  position: relative; overflow: hidden;
+}
+.vip-signup::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(201,41,58,0.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+.vip-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  position: relative; z-index: 1;
+}
+.vip-text h2 { color: var(--cream); margin-bottom: 16px; }
+.vip-text p  { color: rgba(240,220,220,0.75); margin-bottom: 28px; }
+.vip-perks { display: flex; flex-direction: column; gap: 12px; }
+.vip-perks li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.9rem; color: rgba(240,220,220,0.8);
+}
+.vip-perks li::before { content: '✦'; color: var(--gold); font-size: 0.65rem; flex-shrink: 0; }
+.vip-form-wrap {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,41,58,0.25);
+  border-radius: 20px; padding: 40px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), var(--glow);
+}
+.vip-form h3 { font-family: var(--font-serif); font-size: 1.4rem; color: var(--cream); margin-bottom: 24px; }
+.vip-field { margin-bottom: 14px; }
+.vip-field input {
+  width: 100%; padding: 14px 18px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(201,41,58,0.2);
+  border-radius: 10px;
+  color: var(--cream); font-size: 0.95rem;
+  font-family: var(--font-sans); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.vip-field input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,41,58,0.15);
+}
+.vip-field input::placeholder { color: rgba(240,210,210,0.4); }
+.vip-submit { width: 100%; justify-content: center; margin-top: 8px; font-size: 1rem; padding: 16px; }
+.vip-note { font-size: 0.75rem; color: rgba(240,210,210,0.4); text-align: center; margin-top: 12px; }
+.vip-success {
+  display: none; flex-direction: column; align-items: center;
+  text-align: center; padding: 20px 0;
+}
+.vip-success-icon { font-size: 3rem; margin-bottom: 16px; }
+.vip-success h3 { font-family: var(--font-serif); font-size: 1.8rem; color: var(--gold); margin-bottom: 12px; }
+.vip-success p { color: rgba(240,220,220,0.75); }
+@media (max-width: 768px) {
+  .vip-inner { grid-template-columns: 1fr; gap: 40px; }
+  .vip-form-wrap { padding: 28px 20px; }
+}
+
 /* ─── FOOTER ──────────────────────────────────────────────── */
 footer {
   background: var(--brown-dark);

@@ -126,3 +126,17 @@ create policy "allow all" on specials for all using (true) with check (true);
 create policy "allow all" on events for all using (true) with check (true);
 create policy "allow all" on posts for all using (true) with check (true);
 create policy "allow all" on emails for all using (true) with check (true);
+
+-- VIP Subscribers
+create table if not exists subscribers (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamptz default now(),
+  name text not null,
+  email text unique not null,
+  phone text,
+  source text default 'website'
+);
+alter table subscribers enable row level security;
+create policy "Public insert" on subscribers for insert with check (true);
+create policy "Admin read" on subscribers for select using (true);
+create policy "Admin delete" on subscribers for delete using (true);

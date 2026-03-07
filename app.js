@@ -262,6 +262,44 @@ function addTyping() {
   return div;
 }
 
+// ─── VIP SIGNUP FORM ──────────────────────────────────────
+const vipForm    = document.getElementById('vipForm');
+const vipSuccess = document.getElementById('vipSuccess');
+
+if (vipForm) {
+  vipForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = vipForm.querySelector('.vip-submit');
+    btn.textContent = 'Joining...';
+    btn.disabled = true;
+
+    const data = {
+      name:  document.getElementById('vipName').value.trim(),
+      email: document.getElementById('vipEmail').value.trim(),
+      phone: document.getElementById('vipPhone').value.trim() || null,
+    };
+
+    try {
+      const resp = await fetch('/.netlify/functions/vip-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (resp.ok) {
+        vipForm.style.display    = 'none';
+        vipSuccess.style.display = 'flex';
+      } else {
+        throw new Error('failed');
+      }
+    } catch {
+      btn.textContent = 'Join the VIP List';
+      btn.disabled = false;
+      alert('Something went wrong. Please try again!');
+    }
+  });
+}
+
 // ─── SCROLL ANIMATIONS ────────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {

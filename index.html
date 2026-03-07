@@ -68,6 +68,7 @@
       <a href="#reservation">Reserve</a>
       <a href="#catering">Parties</a>
       <a href="#catering">Catering</a>
+      <a href="#vip" class="btn btn-outline" style="padding:10px 18px;font-size:0.82rem">VIP List</a>
       <a href="#reservation" class="btn btn-primary">Order Online</a>
     </div>
     <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
@@ -615,6 +616,46 @@
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3525.3!2d-82.5079!3d27.9045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s4205+S+MacDill+Ave+Tampa+FL+33611!5e0!3m2!1sen!2sus!4v1"
           width="100%" height="100%" style="border:0" allowfullscreen loading="lazy">
         </iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── VIP SIGNUP ───────────────────────────────────────── -->
+<section class="vip-signup" id="vip">
+  <div class="container">
+    <div class="vip-inner">
+      <div class="vip-text">
+        <span class="section-label" style="color:var(--gold)">VIP List</span>
+        <h2>Get Exclusive Deals &amp; First Access</h2>
+        <p>Join our VIP list and be the first to know about weekly specials, private events, and members-only discounts. No spam — just the good stuff.</p>
+        <ul class="vip-perks">
+          <li>Weekly specials texted to your phone</li>
+          <li>Early access to Friday tasting nights</li>
+          <li>Birthday surprise from us</li>
+          <li>Members-only deals &amp; flash promos</li>
+        </ul>
+      </div>
+      <div class="vip-form-wrap">
+        <form class="vip-form" id="vipForm">
+          <h3>Join Free — Takes 10 Seconds</h3>
+          <div class="vip-field">
+            <input type="text" id="vipName" name="name" placeholder="Your Name" required>
+          </div>
+          <div class="vip-field">
+            <input type="email" id="vipEmail" name="email" placeholder="Email Address" required>
+          </div>
+          <div class="vip-field">
+            <input type="tel" id="vipPhone" name="phone" placeholder="Phone Number (for text alerts)">
+          </div>
+          <button type="submit" class="btn btn-primary vip-submit">Join the VIP List</button>
+          <p class="vip-note">We never share your info. Unsubscribe anytime.</p>
+        </form>
+        <div class="vip-success" id="vipSuccess">
+          <div class="vip-success-icon">🧀</div>
+          <h3>You're In!</h3>
+          <p>Welcome to the VIP list. Watch your phone for exclusive deals from Bar Ten.</p>
+        </div>
       </div>
     </div>
   </div>

@@ -176,6 +176,7 @@ function renderSidebar(activePage) {
       { icon: '📸', text: 'Events',         page: 'events.html' },
     ]},
     { label: 'Marketing', items: [
+      { icon: '⭐', text: 'VIP Subscribers', page: 'subscribers.html', badge: () => { const subs = DB.get('subscribers'); const week = new Date(Date.now() - 7*86400000); return subs.filter(s => new Date(s.createdAt) > week).length; } },
       { icon: '📱', text: 'Social Posts',   page: 'social.html' },
       { icon: '📧', text: 'Email Campaigns',page: 'emails.html' },
     ]},
