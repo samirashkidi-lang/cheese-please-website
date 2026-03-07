@@ -247,6 +247,7 @@
             <div class="byo-size">12 inches</div>
             <p>Feeds 2–3 People · 2 Cheeses | 1 Meat | 1 Jelly | Fruit | Olives | Cornichon</p>
             <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+            <button class="byo-order-btn" data-item="X-Small BYO Board (12&quot;)" data-amount="65">Order Now</button>
           </div>
         </div>
         <div class="byo-card">
@@ -256,6 +257,7 @@
             <div class="byo-size">12 inches</div>
             <p>Feeds 4–6 People · 3 Cheeses | 2 Meats | 2 Jellies | Fruit | Olives | Cornichon</p>
             <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+            <button class="byo-order-btn" data-item="Small BYO Board (12&quot;)" data-amount="90">Order Now</button>
           </div>
         </div>
         <div class="byo-card">
@@ -265,6 +267,7 @@
             <div class="byo-size">16 inches</div>
             <p>Feeds 6–8 People · 4 Cheeses | 3 Meats | 3 Jellies | Fruit | Olives | Cornichon</p>
             <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+            <button class="byo-order-btn" data-item="Medium BYO Board (16&quot;)" data-amount="140">Order Now</button>
           </div>
         </div>
         <div class="byo-card">
@@ -274,6 +277,7 @@
             <div class="byo-size">18 inches</div>
             <p>Feeds 8–10 People · 5 Cheeses | 4 Meats | 3 Jellies | Fruit | Olives | Cornichon</p>
             <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+            <button class="byo-order-btn" data-item="Large BYO Board (18&quot;)" data-amount="185">Order Now</button>
           </div>
         </div>
         <div class="byo-card byo-card-wide">
@@ -283,6 +287,7 @@
             <div class="byo-size">18 inches</div>
             <p>Feeds 10–15 People · 6 Cheeses | 5 Meats | 5 Jellies | Fruit | Olives | Cornichon</p>
             <div class="byo-addons">Add +$5 each: Truffle | Almonds | Crackers</div>
+            <button class="byo-order-btn" data-item="X-Large BYO Board (18&quot;)" data-amount="225">Order Now</button>
           </div>
         </div>
       </div>
@@ -468,7 +473,9 @@
       For groups of 6+ or private events, use our <a href="#catering" style="color:var(--gold)">private events form</a>.
     </p>
     <div class="res-form" style="margin-top:48px">
-      <form id="reservationForm">
+      <form id="reservationForm" name="reservation" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="reservation">
+        <input type="hidden" name="bot-field" style="display:none">
         <div class="form-grid">
           <div class="form-group">
             <label for="resName">Your Name</label>

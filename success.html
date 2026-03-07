@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed — Bar Ten & Cheese Please</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #f5f0ee;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(201,41,58,0.3);
+      border-radius: 16px;
+      padding: 64px 48px;
+      max-width: 520px;
+      width: 100%;
+    }
+    .icon { font-size: 4rem; margin-bottom: 24px; }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: #c9293a;
+      margin-bottom: 16px;
+    }
+    p { color: rgba(240,230,211,0.75); line-height: 1.7; margin-bottom: 12px; }
+    .item-name {
+      display: inline-block;
+      background: rgba(201,41,58,0.15);
+      border: 1px solid rgba(201,41,58,0.4);
+      color: #e84455;
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-weight: 600;
+      margin: 16px 0 24px;
+    }
+    .btn {
+      display: inline-block;
+      background: #c9293a;
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+    .btn:hover { background: #e84455; }
+    .sub { font-size: 0.85rem; margin-top: 24px; color: rgba(240,230,211,0.5); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🧀</div>
+    <h1>Order Confirmed!</h1>
+    <p>Thank you — your payment was successful.</p>
+    <div class="item-name" id="itemName">BYO Charcuterie Board</div>
+    <p>We'll have your board ready. You'll receive a confirmation by email shortly.</p>
+    <p>Questions? Call us or DM <strong>@bartentampa</strong> on Instagram.</p>
+    <a href="/" class="btn">Back to Website</a>
+    <p class="sub">Bar Ten & Cheese Please · 4205 S MacDill Ave, Tampa FL 33611</p>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const item = params.get('item');
+    if (item) document.getElementById('itemName').textContent = item;
+  </script>
+</body>
+</html>

@@ -2,6 +2,34 @@
    Bar Ten & Cheese Please — Main App JS
    ═══════════════════════════════════════════════════════════ */
 
+// ─── BYO BOARD ORDER BUTTONS ──────────────────────────────
+document.querySelectorAll('.byo-order-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const item   = btn.dataset.item;
+    const amount = parseFloat(btn.dataset.amount);
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+
+    try {
+      const resp = await fetch('/.netlify/functions/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item, amount }),
+      });
+      const data = await resp.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Could not create checkout');
+      }
+    } catch (err) {
+      btn.textContent = 'Order Now';
+      btn.disabled = false;
+      alert('Sorry, something went wrong. Please call us to order: 612.607.2422');
+    }
+  });
+});
+
 // ─── NAV: scroll effect + mobile toggle ───────────────────
 const nav       = document.getElementById('nav');
 const navToggle = document.getElementById('navToggle');
@@ -104,15 +132,22 @@ resForm.addEventListener('submit', async (e) => {
   const data = Object.fromEntries(new FormData(resForm));
 
   try {
-    // Send to Netlify Forms (works automatically on Netlify hosting)
-    const resp = await fetch('/', {
+    // Save to Supabase database
+    const dbResp = await fetch('/.netlify/functions/reservation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    // Also send to Netlify Forms as backup
+    fetch('/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ 'form-name': 'reservation', ...data }).toString(),
-    });
+    }).catch(() => {});
 
-    if (resp.ok) {
-      resForm.style.display    = 'none';
+    if (dbResp.ok) {
+      resForm.style.display     = 'none';
       formSuccess.style.display = 'block';
 
       // If newsletter checked, send to mailing list endpoint
@@ -123,7 +158,7 @@ resForm.addEventListener('submit', async (e) => {
         }).catch(() => {});
       }
     } else {
-      throw new Error('Form submission failed');
+      throw new Error('Submission failed');
     }
   } catch (err) {
     // Fallback: mailto
@@ -174,7 +209,7 @@ const LOCAL_KB = [
   { q: /vegan|vegetarian|gluten|allerg/i,  a: "We can accommodate most dietary needs! Just mention your allergies when you make a reservation and we'll take care of you." },
   { q: /kid|child|family|age/i,            a: "We're a bar, so we're 21+ after 9 PM. Before that, all ages are welcome with a parent or guardian!" },
   { q: /delivery|uber|doordash|order/i,    a: "We're on Uber Eats for delivery! Search 'Bar Ten' in your app. Or come in and experience the full cheese bar — much better in person 😄" },
-  { q: /instagram|social|follow/i,         a: "Follow us on Instagram @cheesepleasetampa for daily specials, cheese facts, and behind-the-scenes content!" },
+  { q: /instagram|social|follow/i,         a: "Follow us on Instagram @bartentampa for daily specials, cheese facts, and behind-the-scenes content!" },
 ];
 
 async function sendChat() {

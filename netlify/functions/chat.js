@@ -21,7 +21,7 @@ BUSINESS FACTS:
 - Wings special: 5 full wings + fries for $10, all day every day
 - Cheese & charcuterie flights from $16
 - Private events, catering, and group bookings available
-- Instagram: @cheesepleasetampa
+- Instagram: @bartentampa
 - Reservations: cheesepleasetampa.com
 - Rated 4.8 stars across 182+ reviews
 

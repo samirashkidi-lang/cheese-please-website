@@ -276,6 +276,9 @@ section    { padding: 96px 0; }
 .byo-size { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
 .byo-info p { font-size: 0.82rem; color: rgba(240,230,211,0.75); line-height: 1.5; }
 .byo-addons { margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 10px; }
+.byo-order-btn { margin-top: 14px; width: 100%; padding: 12px; background: var(--gold); color: #fff; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; letter-spacing: 0.02em; }
+.byo-order-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+.byo-order-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 /* ─── EVENTS / EXPERIENCES ────────────────────────────────── */
 .events { background: var(--brown-mid); }
