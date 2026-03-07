@@ -1,0 +1,11 @@
+{
+  "name": "cheese-please-website",
+  "version": "1.0.0",
+  "description": "Bar Ten & Cheese Please — South Tampa",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
