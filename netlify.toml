@@ -3,10 +3,14 @@
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/admin"
+  to = "/admin/index.html"
   status = 200
-  conditions = {Role = ["admin"]}
+
+[[redirects]]
+  from = "/admin/"
+  to = "/admin/index.html"
+  status = 200
 
 # Force HTTPS always
 [[headers]]
