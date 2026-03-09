@@ -1,7 +1,10 @@
 /**
  * Netlify Function: Create Stripe Checkout Session
- * Accepts multiple line items + customer info
+ * Also saves order + customer info to Supabase board_orders table
  */
+
+const SUPABASE_URL = 'https://rhlbnqpljkcbggtmoldz.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY || 'sb_publishable_DGyrcJ_OvzPxCPQkTLFLPQ_nzviID_M';
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -16,8 +19,32 @@ exports.handler = async (event) => {
       throw new Error('No items in order');
     }
 
-    const pickupDesc = `Pickup ${pickupDate} at ${pickupTime} · ${customerName} · ${customerPhone}`;
+    const total = items.reduce((sum, l) => sum + l.amount * (l.quantity || 1), 0);
+    const itemsSummary = items.map(l => `${l.quantity}x ${l.item}`).join(', ');
+    const pickupDesc   = `Pickup ${pickupDate} at ${pickupTime} · ${customerName} · ${customerPhone}`;
 
+    // ── Save to Supabase (non-blocking — don't let DB error kill checkout) ──
+    fetch(`${SUPABASE_URL}/rest/v1/board_orders`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({
+        name:        customerName,
+        email:       customerEmail,
+        phone:       customerPhone,
+        items:       itemsSummary,
+        pickup_date: pickupDate,
+        pickup_time: pickupTime,
+        total:       total,
+        status:      'pending',
+      }),
+    }).catch(err => console.warn('Supabase save failed (non-fatal):', err.message));
+
+    // ── Build Stripe Checkout ──
     const params = new URLSearchParams();
     params.append('payment_method_types[]', 'card');
     params.append('mode', 'payment');
