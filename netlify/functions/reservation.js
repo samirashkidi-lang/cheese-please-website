@@ -1,10 +1,10 @@
 /**
- * Netlify Function: Save reservation to Supabase
- * Endpoint: /.netlify/functions/reservation
+ * Netlify Function: Save reservation to Supabase + email notification
  */
 
 const SUPABASE_URL = 'https://rhlbnqpljkcbggtmoldz.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY || 'sb_publishable_DGyrcJ_OvzPxCPQkTLFLPQ_nzviID_M';
+const SENDGRID_KEY = process.env.SENDGRID_API_KEY;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -14,6 +14,7 @@ exports.handler = async (event) => {
   try {
     const data = JSON.parse(event.body);
 
+    // Save to Supabase
     const resp = await fetch(`${SUPABASE_URL}/rest/v1/reservations`, {
       method: 'POST',
       headers: {
@@ -41,6 +42,42 @@ exports.handler = async (event) => {
     }
 
     const result = await resp.json();
+
+    // Send email notification to both emails
+    if (SENDGRID_KEY) {
+      const emailBody = `
+New Reservation Request!
+
+Name: ${data.name}
+Email: ${data.email}
+Phone: ${data.phone || 'N/A'}
+Party Size: ${data.party_size}
+Date: ${data.date}
+Time: ${data.time}
+Occasion: ${data.occasion || 'N/A'}
+Notes: ${data.notes || 'N/A'}
+      `.trim();
+
+      await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SENDGRID_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalizations: [{
+            to: [
+              { email: 'cheesepleasetampa@gmail.com' },
+              { email: 'bartentampa@gmail.com' }
+            ],
+            subject: `New Reservation — ${data.name} | ${data.date} at ${data.time}`,
+          }],
+          from: { email: 'reservations@cheesepleasetampa.com', name: 'Cheese Please Reservations' },
+          content: [{ type: 'text/plain', value: emailBody }],
+        }),
+      });
+    }
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
