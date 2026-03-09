@@ -57,7 +57,7 @@
       <span class="nav-logo-badge">Bar Ten</span>
     </a>
     <div class="nav-links" id="navLinks">
-      <a href="#bar-ten-menu">Menu</a>
+      <a href="#" onclick="openMenuModal(); return false;">Menu</a>
       <a href="#specials">Specials</a>
       <a href="#reservation">Reserve</a>
       <a href="#catering">Catering</a>
@@ -89,7 +89,7 @@
       </p>
       <div class="hero-ctas">
         <a href="#menu" class="btn btn-primary">Order a Charcuterie Board for Pickup</a>
-        <a href="#menu" class="btn btn-outline">View Menu</a>
+        <a href="#" onclick="openMenuModal(); return false;" class="btn btn-outline">View Menu</a>
       </div>
     </div>
   </div>
@@ -876,6 +876,103 @@
   <div class="chat-input-row">
     <input type="text" class="chat-input" id="chatInput" placeholder="Ask about our menu, hours...">
     <button class="chat-send" id="chatSend">➤</button>
+  </div>
+</div>
+
+<!-- ─── MENU MODAL ─────────────────────────────────────────── -->
+<div id="menuModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,6,2,0.97);z-index:10000;overflow-y:auto;padding:24px 16px;">
+  <div style="max-width:900px;margin:0 auto;position:relative;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;border-bottom:1px solid rgba(212,175,55,0.3);padding-bottom:20px;">
+      <div>
+        <div style="color:var(--gold);font-size:0.8rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Bar Ten & Cheese Please</div>
+        <h2 style="color:var(--cream);margin:0;font-size:1.8rem">Our Menu</h2>
+      </div>
+      <button onclick="closeMenuModal()" style="background:none;border:1px solid rgba(212,175,55,0.4);color:var(--cream);font-size:1.4rem;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;line-height:1">×</button>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px" id="modalMenuTabs">
+      <button class="menu-tab active" onclick="showModalTab('grilled-cheese', this)">Grilled Cheese</button>
+      <button class="menu-tab" onclick="showModalTab('appetizers', this)">Appetizers</button>
+      <button class="menu-tab" onclick="showModalTab('salads', this)">Salads</button>
+      <button class="menu-tab" onclick="showModalTab('handhelds', this)">Handhelds</button>
+      <button class="menu-tab" onclick="showModalTab('flatbreads', this)">Flatbreads</button>
+      <button class="menu-tab" onclick="showModalTab('drinks', this)">Drinks</button>
+    </div>
+
+    <!-- Grilled Cheese -->
+    <div class="modal-tab-content" id="modal-tab-grilled-cheese">
+      <div class="menu-items-grid">
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Ocean Twelve</span><span class="menu-item-price">$12.99</span></div><p class="menu-item-desc">New Woman Cheddar, Aged Irish Whiskey, Double Cream Gouda, Salami, Caramelized Onion Jam on Sourdough</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Batman & Robin</span><span class="menu-item-price">$6.99</span></div><p class="menu-item-desc">Danish Havarti with Dill, Mozarella, Salami with Herb, Sweet Onion Pepper Jam on Sourdough</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Three Kings</span><span class="menu-item-price">$12.99</span></div><p class="menu-item-desc">Spicy Cheddar, Swiss Gruyère, Double Creme Gouda, Tomato on Sourdough</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Facts of Life</span><span class="menu-item-price">$12.99</span></div><p class="menu-item-desc">French Triple Creme Brie, Raspberry Jalapeño Compote, Crispy Onions on Sourdough</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">One Fine Day</span><span class="menu-item-price">$13.99</span></div><p class="menu-item-desc">Black Truffle Goat, Gruyère, Meyer Lemon Jelly, Tomato on Sourdough</p></div>
+      </div>
+      <div style="margin-top:24px;padding:14px 18px;border:1px solid rgba(212,175,55,0.3);border-radius:10px;color:var(--gold);font-style:italic">✨ Ask about our Select Cheese List</div>
+    </div>
+
+    <!-- Appetizers -->
+    <div class="modal-tab-content" id="modal-tab-appetizers" style="display:none">
+      <div class="menu-items-grid">
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Bread & Oil</span><span class="menu-item-price">$5</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Twisted Fries</span><span class="menu-item-price">$8</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Cheese Curds</span><span class="menu-item-price">$10</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Bar Shrimp</span><span class="menu-item-price">$12</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Stuffed Jalapeños</span><span class="menu-item-price">$12</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Butterfly Shrimp</span><span class="menu-item-price">$12</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Onion Rings</span><span class="menu-item-price">$12</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Hummus</span><span class="menu-item-price">$9</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Labneh</span><span class="menu-item-price">$9</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Grape Leaves</span><span class="menu-item-price">$12</span></div></div>
+      </div>
+    </div>
+
+    <!-- Salads -->
+    <div class="modal-tab-content" id="modal-tab-salads" style="display:none">
+      <div class="menu-items-grid">
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Greek Salad</span><span class="menu-item-price">$12</span></div><p class="menu-item-desc">Fresh Romaine, Sliced Cucumber, Tomato, Red Onion, Black Olives, Feta Cheese Crumbles, Greek Dressing</p><span style="color:var(--gold);font-size:0.85rem">+ Add Chicken $5</span></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Fattoush Salad</span><span class="menu-item-price">$14</span></div><p class="menu-item-desc">Fresh Romaine, Tomato, Radish, Sliced Cucumber, Red Onion, Fried Pita Bread Crumbs, Lemon Vinaigrette</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Grilled Caesar Salad</span><span class="menu-item-price">$12</span></div><p class="menu-item-desc">Fresh Romaine, Grated Parmesan, Croutons, Caesar Dressing</p><span style="color:var(--gold);font-size:0.85rem">+ Add Chicken $5</span></div>
+      </div>
+    </div>
+
+    <!-- Handhelds -->
+    <div class="modal-tab-content" id="modal-tab-handhelds" style="display:none">
+      <div class="menu-items-grid">
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Chicken Sandwich</span><span class="menu-item-price">$16</span></div><p class="menu-item-desc">Marinated Chicken, Lettuce, Tomato, Mayonnaise on Hoagie</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Philly Cheesesteak</span><span class="menu-item-price">$16</span></div><p class="menu-item-desc">Philly Steak, Green & Red Peppers, Onion, Cheese, Mayonnaise on Hoagie</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Too Much Burger</span><span class="menu-item-price">$18</span></div><p class="menu-item-desc">½ lb Beef Patty, Lettuce, Tomato, Pickle, Onion, Mayonnaise, Cheese on Bun</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">The Figgy Goat</span><span class="menu-item-price">$20</span></div><p class="menu-item-desc">½ lb Beef Patty, Creamy Goat Cheese, Sweet Fig Jam on Toasted Sourdough</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Whiskey Tide Burger</span><span class="menu-item-price">$20</span></div><p class="menu-item-desc">½ Burger Patty, Cheddar Crisp, Irish Whiskey Aioli, Double Cream Gouda, Caramelized Onion Jam on Toasted Sourdough</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Triple Crown Smash</span><span class="menu-item-price">$20</span></div><p class="menu-item-desc">½ Burger Patty, Spicy Cheddar, Swiss Gruyère Melt, Gouda Crisp, Roasted Tomato, Toasted Sourdough</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">The Golden Goat</span><span class="menu-item-price">$20</span></div><p class="menu-item-desc">½ lb Burger Patty, Black Truffle Goat Cheese, Gruyère Melt, Meyer Lemon Aioli, Roasted Tomato on Toasted Sourdough</p></div>
+      </div>
+    </div>
+
+    <!-- Flatbreads -->
+    <div class="modal-tab-content" id="modal-tab-flatbreads" style="display:none">
+      <div class="menu-items-grid">
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Lebanese Zatar Pie</span><span class="menu-item-price">$15</span></div><p class="menu-item-desc">Thyme, Sesame Seeds, Sumac Cheese on Flatbread with Labneh Dipping Sauce & Tomato</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Buffalo Chicken</span><span class="menu-item-price">$14</span></div><p class="menu-item-desc">Grilled Chicken, Cheese, Ranch and Buffalo Drizzle on Flatbread</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Chicken Caesar</span><span class="menu-item-price">$14</span></div><p class="menu-item-desc">Grilled Chicken, Romaine, Bacon, Ranch on Flatbread</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">BBQ Bacon</span><span class="menu-item-price">$15</span></div><p class="menu-item-desc">Grilled Chicken, Onion, Cheese, Bacon, BBQ Drizzle on Flatbread</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Cheese Burger</span><span class="menu-item-price">$16</span></div><p class="menu-item-desc">Beef, Pickle, Onion, Cheese, Bacon with Dijon Drizzle on Flatbread</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Classic</span><span class="menu-item-price">$12</span></div><p class="menu-item-desc">Classic Cheese Flatbread — choice to add Pepperoni</p></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Chicken Schwarma</span><span class="menu-item-price">$24</span></div><p class="menu-item-desc">Grilled Chicken, Hummus, Garlic Aioli, Pickles, Pita Bread with Fries</p></div>
+      </div>
+    </div>
+
+    <!-- Drinks -->
+    <div class="modal-tab-content" id="modal-tab-drinks" style="display:none">
+      <div class="menu-items-grid">
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Coke</span><span class="menu-item-price">$3</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Diet Coke</span><span class="menu-item-price">$3</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Sprite</span><span class="menu-item-price">$3</span></div></div>
+        <div class="menu-item-card"><div class="menu-item-top"><span class="menu-item-name">Gingerale</span><span class="menu-item-price">$3</span></div></div>
+      </div>
+    </div>
+
   </div>
 </div>
 

@@ -10,6 +10,31 @@ function showMenuTab(tab, btn) {
   btn.classList.add('active');
 }
 
+// ─── MENU MODAL ───────────────────────────────────────────
+function openMenuModal() {
+  document.getElementById('menuModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeMenuModal() {
+  document.getElementById('menuModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+function showModalTab(tab, btn) {
+  document.querySelectorAll('.modal-tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('#modalMenuTabs .menu-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('modal-tab-' + tab).style.display = 'block';
+  btn.classList.add('active');
+}
+// Close modal on backdrop click
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('menuModal');
+  if (e.target === modal) closeMenuModal();
+});
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeMenuModal();
+});
+
 // ─── ORDER MODAL ──────────────────────────────────────────
 const BOARDS = [
   { key: 'xsmall', label: 'X-Small (12")',  desc: 'Feeds 2–3',   price: 65  },
