@@ -2,66 +2,130 @@
    Bar Ten & Cheese Please — Main App JS
    ═══════════════════════════════════════════════════════════ */
 
-// ─── BYO BOARD ORDER BUTTONS ──────────────────────────────
-let _pendingOrder = null; // { item, amount, btn }
+// ─── ORDER MODAL ──────────────────────────────────────────
+const BOARDS = [
+  { key: 'xsmall', label: 'X-Small (12")',  desc: 'Feeds 2–3',   price: 65  },
+  { key: 'small',  label: 'Small (12")',    desc: 'Feeds 4–6',   price: 90  },
+  { key: 'medium', label: 'Medium (16")',   desc: 'Feeds 6–8',   price: 140 },
+  { key: 'large',  label: 'Large (18")',    desc: 'Feeds 8–10',  price: 185 },
+  { key: 'xlarge', label: 'X-Large (18")', desc: 'Feeds 10–15', price: 225 },
+];
 
+const boardQtys = { xsmall: 0, small: 0, medium: 0, large: 0, xlarge: 0 };
+
+// Build board selector rows
+const boardSelector = document.getElementById('boardSelector');
+BOARDS.forEach(b => {
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#2a1f0a;border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:10px 14px;gap:12px';
+  row.innerHTML = `
+    <div style="flex:1;min-width:0">
+      <div style="color:var(--cream);font-size:0.95rem;font-weight:600">${b.label}</div>
+      <div style="color:var(--text-muted);font-size:0.8rem">${b.desc} &nbsp;·&nbsp; <span style="color:var(--gold)">$${b.price}</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <button data-key="${b.key}" data-dir="-1" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:transparent;color:var(--gold);font-size:1.1rem;cursor:pointer;line-height:1">−</button>
+      <span id="qty-${b.key}" style="color:var(--cream);font-size:1rem;min-width:16px;text-align:center">0</span>
+      <button data-key="${b.key}" data-dir="1" style="width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:var(--gold);color:#1a1209;font-size:1.1rem;cursor:pointer;line-height:1">+</button>
+    </div>`;
+  boardSelector.appendChild(row);
+});
+
+boardSelector.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-key]');
+  if (!btn) return;
+  const key = btn.dataset.key;
+  const dir = parseInt(btn.dataset.dir);
+  boardQtys[key] = Math.max(0, boardQtys[key] + dir);
+  document.getElementById(`qty-${key}`).textContent = boardQtys[key];
+  updateOrderTotal();
+});
+
+function updateOrderTotal() {
+  const total = BOARDS.reduce((sum, b) => sum + b.price * boardQtys[b.key], 0);
+  document.getElementById('orderTotalDisplay').textContent = `$${total.toFixed(2)}`;
+  const hasBoards  = total > 0;
+  const checkoutBtn = document.getElementById('orderCheckoutBtn');
+  checkoutBtn.disabled = !hasBoards;
+  checkoutBtn.style.opacity  = hasBoards ? '1' : '0.45';
+  checkoutBtn.style.cursor   = hasBoards ? 'pointer' : 'not-allowed';
+}
+
+function openOrderModal(presetKey) {
+  // Reset all qtys
+  BOARDS.forEach(b => { boardQtys[b.key] = 0; document.getElementById(`qty-${b.key}`).textContent = '0'; });
+  // Pre-select the clicked board
+  if (presetKey) { boardQtys[presetKey] = 1; document.getElementById(`qty-${presetKey}`).textContent = '1'; }
+  updateOrderTotal();
+
+  // Set min date to tomorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  const dateInput = document.getElementById('pickupDate');
+  dateInput.setAttribute('min', tomorrowStr);
+  dateInput.value = tomorrowStr;
+
+  document.getElementById('orderModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOrderModal() {
+  document.getElementById('orderModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Close on backdrop click
+document.getElementById('orderModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('orderModal')) closeOrderModal();
+});
+
+// "Order Now" buttons on each board card
 document.querySelectorAll('.byo-order-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    _pendingOrder = { item: btn.dataset.item, amount: parseFloat(btn.dataset.amount), btn };
-
-    // Set min date to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
-    const pickupDate = document.getElementById('pickupDate');
-    pickupDate.setAttribute('min', tomorrowStr);
-    pickupDate.value = tomorrowStr;
-
-    document.getElementById('pickupModal').style.display = 'flex';
-  });
+  // Map data-item to BOARDS key
+  const label = (btn.dataset.item || '').toLowerCase();
+  let key = 'xsmall';
+  if (label.includes('x-large') || label.includes('x-large')) key = 'xlarge';
+  else if (label.includes('x-small'))  key = 'xsmall';
+  else if (label.includes('small'))    key = 'small';
+  else if (label.includes('medium'))   key = 'medium';
+  else if (label.includes('large'))    key = 'large';
+  btn.addEventListener('click', () => openOrderModal(key));
 });
 
-// Close modal on backdrop click
-document.getElementById('pickupModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('pickupModal')) {
-    document.getElementById('pickupModal').style.display = 'none';
-    _pendingOrder = null;
-  }
-});
+// Checkout button
+document.getElementById('orderCheckoutBtn').addEventListener('click', async () => {
+  const name  = document.getElementById('orderName').value.trim();
+  const email = document.getElementById('orderEmail').value.trim();
+  const phone = document.getElementById('orderPhone').value.trim();
+  const date  = document.getElementById('pickupDate').value;
+  const time  = document.getElementById('pickupTime').value;
 
-// Confirm pickup selection and proceed to Stripe
-document.getElementById('pickupConfirmBtn').addEventListener('click', async () => {
-  const pickupDate = document.getElementById('pickupDate').value;
-  const pickupTime = document.getElementById('pickupTime').value;
+  if (!name)  { alert('Please enter your full name.'); return; }
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+  if (!phone) { alert('Please enter your phone number.'); return; }
+  if (!date)  { alert('Please select a pickup date.'); return; }
 
-  if (!pickupDate || !pickupTime) {
-    alert('Please select a pickup date and time.');
-    return;
-  }
+  const items = BOARDS
+    .filter(b => boardQtys[b.key] > 0)
+    .map(b => ({ item: b.label, amount: b.price, quantity: boardQtys[b.key] }));
 
-  if (!_pendingOrder) return;
+  if (items.length === 0) { alert('Please select at least one board.'); return; }
 
-  document.getElementById('pickupModal').style.display = 'none';
-
-  const { item, amount, btn } = _pendingOrder;
-  _pendingOrder = null;
-
-  const originalText = btn.textContent;
+  const btn = document.getElementById('orderCheckoutBtn');
   btn.textContent = 'Processing...';
   btn.disabled = true;
 
-  // Format date nicely: "Mon Mar 10"
-  const [year, month, day] = pickupDate.split('-');
-  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-  const dateLabel = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-
-  const itemWithPickup = `${item} — Pickup ${dateLabel} at ${pickupTime}`;
+  // Format date label
+  const [yr, mo, dy] = date.split('-');
+  const dateLabel = new Date(parseInt(yr), parseInt(mo) - 1, parseInt(dy))
+    .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
   try {
     const resp = await fetch('/.netlify/functions/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ item: itemWithPickup, amount }),
+      body: JSON.stringify({ items, pickupDate: dateLabel, pickupTime: time, customerName: name, customerEmail: email, customerPhone: phone }),
     });
     const data = await resp.json();
     if (data.url) {
@@ -70,9 +134,9 @@ document.getElementById('pickupConfirmBtn').addEventListener('click', async () =
       throw new Error(data.error || 'Could not create checkout');
     }
   } catch (err) {
-    btn.textContent = originalText;
+    btn.textContent = 'Continue to Payment →';
     btn.disabled = false;
-    alert('Sorry, something went wrong. Please call us to order: 612.607.2422');
+    alert('Sorry, something went wrong. Please call us: 612.607.2422');
   }
 });
 

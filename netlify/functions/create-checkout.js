@@ -1,6 +1,6 @@
 /**
  * Netlify Function: Create Stripe Checkout Session
- * Endpoint: /.netlify/functions/create-checkout
+ * Accepts multiple line items + customer info
  */
 
 exports.handler = async (event) => {
@@ -9,21 +9,33 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { item, amount, quantity = 1 } = JSON.parse(event.body);
+    const { items, pickupDate, pickupTime, customerName, customerEmail, customerPhone } = JSON.parse(event.body);
     const origin = event.headers.origin || 'https://cheesepleasetampa.com';
 
-    const params = new URLSearchParams({
-      'payment_method_types[]': 'card',
-      'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][product_data][name]': `Bar Ten — ${item}`,
-      'line_items[0][price_data][product_data][description]': 'BYO Charcuterie Board — Bar Ten & Cheese Please Tampa',
-      'line_items[0][price_data][unit_amount]': String(Math.round(amount * 100)),
-      'line_items[0][quantity]': String(quantity),
-      'mode': 'payment',
-      'success_url': `${origin}/success.html?item=${encodeURIComponent(item)}`,
-      'cancel_url': `${origin}/#menu`,
-      'billing_address_collection': 'auto',
-      'phone_number_collection[enabled]': 'true',
+    if (!items || items.length === 0) {
+      throw new Error('No items in order');
+    }
+
+    const pickupDesc = `Pickup ${pickupDate} at ${pickupTime} · ${customerName} · ${customerPhone}`;
+
+    const params = new URLSearchParams();
+    params.append('payment_method_types[]', 'card');
+    params.append('mode', 'payment');
+    params.append('success_url', `${origin}/success.html`);
+    params.append('cancel_url', `${origin}/#menu`);
+    params.append('billing_address_collection', 'auto');
+    if (customerEmail) params.append('customer_email', customerEmail);
+    params.append('metadata[customer_name]',  customerName  || '');
+    params.append('metadata[customer_phone]', customerPhone || '');
+    params.append('metadata[pickup_date]',    pickupDate    || '');
+    params.append('metadata[pickup_time]',    pickupTime    || '');
+
+    items.forEach((line, i) => {
+      params.append(`line_items[${i}][price_data][currency]`, 'usd');
+      params.append(`line_items[${i}][price_data][product_data][name]`, `Bar Ten — ${line.item}`);
+      params.append(`line_items[${i}][price_data][product_data][description]`, pickupDesc);
+      params.append(`line_items[${i}][price_data][unit_amount]`, String(Math.round(line.amount * 100)));
+      params.append(`line_items[${i}][quantity]`, String(line.quantity || 1));
     });
 
     const resp = await fetch('https://api.stripe.com/v1/checkout/sessions', {
