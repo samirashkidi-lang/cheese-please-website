@@ -208,31 +208,22 @@
 <!-- ─── MENU PREVIEW ──────────────────────────────────────── -->
 <section class="menu-preview" id="menu">
   <div class="container">
-    <span class="section-label">Our Menu</span>
-    <h2>Handpicked. Imported. Unforgettable.</h2>
-    <p style="color:var(--text-muted);margin-bottom:48px">
-      Every cheese on our menu is sourced from small producers who care about their craft.
-      Build your own flight or let us surprise you.
-    </p>
+    <span class="section-label">Order for Pickup</span>
+    <h2>Charcuterie Boards</h2>
 
-    <div class="menu-tabs">
-      <button class="menu-tab active" data-tab="cheese">Cheese Flights</button>
-      <button class="menu-tab" data-tab="boards">Charcuterie Boards</button>
-      <button class="menu-tab" data-tab="charcuterie">Charcuterie Bar</button>
-      <button class="menu-tab" data-tab="drinks">Drinks</button>
-      <button class="menu-tab" data-tab="food">Bar Bites</button>
+    <div style="background:rgba(212,175,55,0.1);border:1px solid var(--gold);border-radius:12px;padding:16px 24px;margin-bottom:40px;display:flex;align-items:flex-start;gap:12px">
+      <span style="font-size:1.3rem;line-height:1">📋</span>
+      <div>
+        <strong style="color:var(--gold);display:block;margin-bottom:4px">Order Requirements</strong>
+        <ul style="color:var(--text-muted);font-size:0.9rem;margin:0;padding-left:18px;line-height:1.7">
+          <li>Orders must be placed <strong style="color:var(--cream)">at least 1 day in advance</strong></li>
+          <li>Pickup available <strong style="color:var(--cream)">after 4:00 PM</strong> on your selected date</li>
+          <li>No same-day orders accepted</li>
+        </ul>
+      </div>
     </div>
 
-    <div class="menu-panel active" id="tab-cheese">
-      <div class="menu-item"><div class="menu-item-info"><h4>Goat Cheese Flight</h4><p>3 selections from France &amp; Spain, paired with honeycomb &amp; crackers</p></div><div class="menu-item-price">$18</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Sheep's Milk Flight</h4><p>Manchego, Pecorino, Ossau-Iraty — aged &amp; fresh varieties</p></div><div class="menu-item-price">$20</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Cow's Milk Flight</h4><p>Comté, Gruyère, Cheddar — the classics done right</p></div><div class="menu-item-price">$18</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Blue Cheese Flight</h4><p>Roquefort, Gorgonzola, Stilton — bold &amp; beautiful</p></div><div class="menu-item-price">$20</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>The Grand Board</h4><p>Chef's selection of 5 cheeses + full charcuterie accompaniments</p></div><div class="menu-item-price">$42</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Build Your Own Flight</h4><p>Choose any 3 cheeses + 2 accompaniments</p></div><div class="menu-item-price">from $16</div></div>
-    </div>
-
-    <div class="menu-panel" id="tab-boards">
+    <div id="tab-boards">
       <div class="byo-grid">
         <div class="byo-card">
           <div class="byo-img" style="background-image:url('images/food-8.jpg')"></div>
@@ -285,36 +276,6 @@
           </div>
         </div>
       </div>
-      <p style="text-align:center;color:var(--text-muted);margin-top:24px;font-size:0.9rem">Call ahead or order online to have your board ready when you arrive.</p>
-    </div>
-
-    <div class="menu-panel" id="tab-charcuterie">
-      <div class="menu-item"><div class="menu-item-info"><h4>Prosciutto di Parma</h4><p>18-month aged, thinly sliced, imported from Italy</p></div><div class="menu-item-price">$8</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Spanish Chorizo</h4><p>Smoky, paprika-forward cured sausage from Castilla</p></div><div class="menu-item-price">$7</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Spanish Marcona Almonds</h4><p>Roasted in olive oil &amp; sea salt — the perfect pairing</p></div><div class="menu-item-price">$5</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Honeycomb</h4><p>Wild-harvest honeycomb, goes with everything</p></div><div class="menu-item-price">$4</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Castelvetrano Olives</h4><p>Italian buttery green olives, mild &amp; addictive</p></div><div class="menu-item-price">$5</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Charcuterie Board</h4><p>Rotating selection of 4 cured meats + accompaniments</p></div><div class="menu-item-price">$24</div></div>
-    </div>
-
-    <div class="menu-panel" id="tab-drinks">
-      <div class="menu-item"><div class="menu-item-info"><h4>Wine by the Glass</h4><p>Rotating selection of 12 reds, whites &amp; rosés</p></div><div class="menu-item-price">$9–$16</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Wine by the Bottle</h4><p>Curated cellar list — ask your server for recommendations</p></div><div class="menu-item-price">$28–$95</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Craft Cocktails</h4><p>Seasonal cocktails made with premium spirits</p></div><div class="menu-item-price">$11–$14</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Draft Beers</h4><p>Local and imported craft beers on tap</p></div><div class="menu-item-price">$5–$8</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>High Noon &amp; Nütrl</h4><p>Hard seltzers — $4 on Thursdays</p></div><div class="menu-item-price">$5 / $4 Thu</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Non-Alcoholic</h4><p>Sparkling water, specialty sodas, coffee &amp; tea</p></div><div class="menu-item-price">$3–$5</div></div>
-    </div>
-
-    <div class="menu-panel" id="tab-food">
-      <div class="menu-item"><div class="menu-item-info"><h4>Wings Special</h4><p>5 full wings + fries — available all day, every day</p></div><div class="menu-item-price">$10</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Grilled Cheese Sandwich</h4><p>Made with your choice of premium imported cheese on sourdough</p></div><div class="menu-item-price">$12</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Fried Beer-Battered Cheese Curds</h4><p>Golden, crispy, served with house marinara</p></div><div class="menu-item-price">$10</div></div>
-      <div class="menu-item"><div class="menu-item-info"><h4>Artisan Crackers &amp; Bread</h4><p>Selection of house crackers, crostini &amp; artisan bread</p></div><div class="menu-item-price">$5</div></div>
-    </div>
-
-    <div class="menu-cta">
-      <a href="#menu" class="btn btn-dark">View Full Menu →</a>
     </div>
   </div>
 </section>
@@ -656,6 +617,41 @@
     </div>
   </div>
 </footer>
+
+<!-- ─── PICKUP TIME MODAL ─────────────────────────────────── -->
+<div id="pickupModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#1a1209;border:1px solid var(--gold);border-radius:16px;padding:36px;max-width:440px;width:90%;position:relative;">
+    <button onclick="document.getElementById('pickupModal').style.display='none'" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--cream);font-size:1.5rem;cursor:pointer">×</button>
+    <h3 style="color:var(--gold);margin-bottom:8px">📦 Schedule Your Pickup</h3>
+    <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:24px">Orders must be placed the day before. Pickup available after 4:00 PM.</p>
+    <div style="margin-bottom:16px">
+      <label style="color:var(--cream);font-size:0.9rem;display:block;margin-bottom:6px">Pickup Date</label>
+      <input type="date" id="pickupDate" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--gold);background:#2a1f0a;color:var(--cream);font-size:1rem">
+    </div>
+    <div style="margin-bottom:24px">
+      <label style="color:var(--cream);font-size:0.9rem;display:block;margin-bottom:6px">Pickup Time</label>
+      <select id="pickupTime" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--gold);background:#2a1f0a;color:var(--cream);font-size:1rem">
+        <option value="4:00 PM">4:00 PM</option>
+        <option value="4:30 PM">4:30 PM</option>
+        <option value="5:00 PM">5:00 PM</option>
+        <option value="5:30 PM">5:30 PM</option>
+        <option value="6:00 PM">6:00 PM</option>
+        <option value="6:30 PM">6:30 PM</option>
+        <option value="7:00 PM">7:00 PM</option>
+        <option value="7:30 PM">7:30 PM</option>
+        <option value="8:00 PM">8:00 PM</option>
+        <option value="8:30 PM">8:30 PM</option>
+        <option value="9:00 PM">9:00 PM</option>
+        <option value="9:30 PM">9:30 PM</option>
+        <option value="10:00 PM">10:00 PM</option>
+        <option value="10:30 PM">10:30 PM</option>
+        <option value="11:00 PM">11:00 PM (Fri/Sat only)</option>
+        <option value="11:30 PM">11:30 PM (Fri/Sat only)</option>
+      </select>
+    </div>
+    <button id="pickupConfirmBtn" class="btn btn-primary" style="width:100%">Continue to Payment →</button>
+  </div>
+</div>
 
 <!-- ─── AI CHAT BOT ───────────────────────────────────────── -->
 <button class="chat-fab" id="chatFab" title="Ask us anything">🧀</button>
