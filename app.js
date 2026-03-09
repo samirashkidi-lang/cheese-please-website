@@ -410,6 +410,45 @@ if (vipForm) {
   });
 }
 
+// ─── CONTACT / INQUIRY FORM ───────────────────────────────
+const contactForm    = document.getElementById('contactForm');
+const contactSuccess = document.getElementById('contactSuccess');
+
+if (contactForm) {
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('contactSubmitBtn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    const payload = {
+      name:    document.getElementById('contactName').value.trim(),
+      email:   document.getElementById('contactEmail').value.trim(),
+      phone:   document.getElementById('contactPhone').value.trim() || null,
+      message: document.getElementById('contactMessage').value.trim(),
+    };
+
+    try {
+      const resp = await fetch('/.netlify/functions/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (resp.ok) {
+        contactForm.style.display    = 'none';
+        contactSuccess.style.display = 'block';
+      } else {
+        throw new Error('failed');
+      }
+    } catch {
+      btn.textContent = 'Send Message →';
+      btn.disabled = false;
+      alert('Something went wrong. Please email us directly at cheesepleasetampa@gmail.com');
+    }
+  });
+}
+
 // ─── SCROLL ANIMATIONS ────────────────────────────────────
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {
