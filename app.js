@@ -58,13 +58,13 @@ function openOrderModal(presetKey) {
   if (presetKey) { boardQtys[presetKey] = 1; document.getElementById(`qty-${presetKey}`).textContent = '1'; }
   updateOrderTotal();
 
-  // Set min date to tomorrow
+  // Set min date to tomorrow, default to next open Wed–Sat
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
   const dateInput = document.getElementById('pickupDate');
   dateInput.setAttribute('min', tomorrowStr);
-  dateInput.value = tomorrowStr;
+  dateInput.value = nextOpenDay(tomorrowStr);
 
   document.getElementById('orderModal').style.display = 'block';
   document.body.style.overflow = 'hidden';
@@ -74,6 +74,14 @@ function closeOrderModal() {
   document.getElementById('orderModal').style.display = 'none';
   document.body.style.overflow = '';
 }
+
+// Warn if customer picks a closed day on the pickup date
+document.getElementById('pickupDate').addEventListener('change', (e) => {
+  if (e.target.value && !isOpenDay(e.target.value)) {
+    alert('Sorry — we are only open Wednesday through Saturday. Please pick a different date.');
+    e.target.value = '';
+  }
+});
 
 // Close on backdrop click
 document.getElementById('orderModal').addEventListener('click', (e) => {
@@ -105,6 +113,7 @@ document.getElementById('orderCheckoutBtn').addEventListener('click', async () =
   if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
   if (!phone) { alert('Please enter your phone number.'); return; }
   if (!date)  { alert('Please select a pickup date.'); return; }
+  if (!isOpenDay(date)) { alert('Sorry — we are only open Wednesday through Saturday. Please pick a different date.'); return; }
 
   const items = BOARDS
     .filter(b => boardQtys[b.key] > 0)
@@ -226,11 +235,37 @@ function updateFlightSummary() {
 const resForm    = document.getElementById('reservationForm');
 const formSuccess = document.getElementById('formSuccess');
 
-// Set min date to today
+// Returns true if the date (YYYY-MM-DD) falls on a day we're open (Wed=3, Thu=4, Fri=5, Sat=6)
+function isOpenDay(dateStr) {
+  if (!dateStr) return false;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const day = new Date(y, m - 1, d).getDay(); // 0=Sun,1=Mon,...,6=Sat
+  return day >= 3 && day <= 6;
+}
+
+// Advance a date string to the next open day (Wed–Sat)
+function nextOpenDay(fromDate) {
+  const d = new Date(fromDate);
+  for (let i = 0; i < 7; i++) {
+    const day = d.getDay();
+    if (day >= 3 && day <= 6) return d.toISOString().split('T')[0];
+    d.setDate(d.getDate() + 1);
+  }
+  return fromDate;
+}
+
+// Set min date to today and default to next open day
 const dateInput = document.getElementById('resDate');
 if (dateInput) {
   const today = new Date().toISOString().split('T')[0];
   dateInput.setAttribute('min', today);
+
+  dateInput.addEventListener('change', () => {
+    if (!isOpenDay(dateInput.value)) {
+      alert('Sorry — we are only open Wednesday through Saturday. Please pick a different date.');
+      dateInput.value = '';
+    }
+  });
 }
 
 resForm.addEventListener('submit', async (e) => {
