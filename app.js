@@ -3,31 +3,77 @@
    ═══════════════════════════════════════════════════════════ */
 
 // ─── BYO BOARD ORDER BUTTONS ──────────────────────────────
-document.querySelectorAll('.byo-order-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const item   = btn.dataset.item;
-    const amount = parseFloat(btn.dataset.amount);
-    btn.textContent = 'Processing...';
-    btn.disabled = true;
+let _pendingOrder = null; // { item, amount, btn }
 
-    try {
-      const resp = await fetch('/.netlify/functions/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item, amount }),
-      });
-      const data = await resp.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'Could not create checkout');
-      }
-    } catch (err) {
-      btn.textContent = 'Order Now';
-      btn.disabled = false;
-      alert('Sorry, something went wrong. Please call us to order: 612.607.2422');
-    }
+document.querySelectorAll('.byo-order-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    _pendingOrder = { item: btn.dataset.item, amount: parseFloat(btn.dataset.amount), btn };
+
+    // Set min date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const pickupDate = document.getElementById('pickupDate');
+    pickupDate.setAttribute('min', tomorrowStr);
+    pickupDate.value = tomorrowStr;
+
+    document.getElementById('pickupModal').style.display = 'flex';
   });
+});
+
+// Close modal on backdrop click
+document.getElementById('pickupModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('pickupModal')) {
+    document.getElementById('pickupModal').style.display = 'none';
+    _pendingOrder = null;
+  }
+});
+
+// Confirm pickup selection and proceed to Stripe
+document.getElementById('pickupConfirmBtn').addEventListener('click', async () => {
+  const pickupDate = document.getElementById('pickupDate').value;
+  const pickupTime = document.getElementById('pickupTime').value;
+
+  if (!pickupDate || !pickupTime) {
+    alert('Please select a pickup date and time.');
+    return;
+  }
+
+  if (!_pendingOrder) return;
+
+  document.getElementById('pickupModal').style.display = 'none';
+
+  const { item, amount, btn } = _pendingOrder;
+  _pendingOrder = null;
+
+  const originalText = btn.textContent;
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
+
+  // Format date nicely: "Mon Mar 10"
+  const [year, month, day] = pickupDate.split('-');
+  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  const dateLabel = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+  const itemWithPickup = `${item} — Pickup ${dateLabel} at ${pickupTime}`;
+
+  try {
+    const resp = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item: itemWithPickup, amount }),
+    });
+    const data = await resp.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Could not create checkout');
+    }
+  } catch (err) {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    alert('Sorry, something went wrong. Please call us to order: 612.607.2422');
+  }
 });
 
 // ─── NAV: scroll effect + mobile toggle ───────────────────
