@@ -5,6 +5,7 @@
 
 const SUPABASE_URL = 'https://rhlbnqpljkcbggtmoldz.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY || 'sb_publishable_DGyrcJ_OvzPxCPQkTLFLPQ_nzviID_M';
+const SENDGRID_KEY = process.env.SENDGRID_API_KEY;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -43,6 +44,43 @@ exports.handler = async (event) => {
         status:      'pending',
       }),
     }).catch(err => console.warn('Supabase save failed (non-fatal):', err.message));
+
+    // ── Email notification to both business emails ──
+    if (SENDGRID_KEY) {
+      const emailBody = `
+New Board Order Received!
+
+Customer:   ${customerName}
+Email:      ${customerEmail}
+Phone:      ${customerPhone || 'N/A'}
+
+Order:      ${itemsSummary}
+Pickup:     ${pickupDate} at ${pickupTime}
+Total:      $${total.toFixed(2)}
+
+NOTE: Payment is collected via Stripe. The customer will receive a Stripe payment link.
+      `.trim();
+
+      fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SENDGRID_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          personalizations: [{
+            to: [
+              { email: 'cheesepleasetampa@gmail.com' },
+              { email: 'bartentampa@gmail.com' },
+            ],
+            subject: `New Board Order — ${customerName} | Pickup ${pickupDate} at ${pickupTime}`,
+          }],
+          from: { email: 'reservations@cheesepleasetampa.com', name: 'Cheese Please Orders' },
+          reply_to: { email: customerEmail, name: customerName },
+          content: [{ type: 'text/plain', value: emailBody }],
+        }),
+      }).catch(err => console.warn('SendGrid failed (non-fatal):', err.message));
+    }
 
     // ── Build Stripe Checkout ──
     const params = new URLSearchParams();
