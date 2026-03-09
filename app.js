@@ -2,6 +2,14 @@
    Bar Ten & Cheese Please — Main App JS
    ═══════════════════════════════════════════════════════════ */
 
+// ─── BAR TEN MENU TABS ────────────────────────────────────
+function showMenuTab(tab, btn) {
+  document.querySelectorAll('.menu-tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('#menuTabs .menu-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).style.display = 'block';
+  btn.classList.add('active');
+}
+
 // ─── ORDER MODAL ──────────────────────────────────────────
 const BOARDS = [
   { key: 'xsmall', label: 'X-Small (12")',  desc: 'Feeds 2–3',   price: 65  },
