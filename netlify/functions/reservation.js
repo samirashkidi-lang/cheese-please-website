@@ -68,11 +68,11 @@ Notes: ${data.notes || 'N/A'}
           personalizations: [{
             to: [
               { email: 'cheesepleasetampa@gmail.com' },
-              { email: 'bartentampa@gmail.com' }
+              { email: 'samirashkidi@gmail.com' }
             ],
             subject: `New Reservation — ${data.name} | ${data.date} at ${data.time}`,
           }],
-          from: { email: 'reservations@cheesepleasetampa.com', name: 'Cheese Please Reservations' },
+          from: { email: 'samirashkidi@gmail.com', name: 'Cheese Please Tampa' },
           content: [{ type: 'text/plain', value: emailBody }],
         }),
       });

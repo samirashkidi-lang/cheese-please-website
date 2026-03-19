@@ -71,11 +71,11 @@ NOTE: Payment is collected via Stripe. The customer will receive a Stripe paymen
           personalizations: [{
             to: [
               { email: 'cheesepleasetampa@gmail.com' },
-              { email: 'bartentampa@gmail.com' },
+              { email: 'samirashkidi@gmail.com' },
             ],
             subject: `New Board Order — ${customerName} | Pickup ${pickupDate} at ${pickupTime}`,
           }],
-          from: { email: 'reservations@cheesepleasetampa.com', name: 'Cheese Please Orders' },
+          from: { email: 'samirashkidi@gmail.com', name: 'Cheese Please Tampa' },
           reply_to: { email: customerEmail, name: customerName },
           content: [{ type: 'text/plain', value: emailBody }],
         }),

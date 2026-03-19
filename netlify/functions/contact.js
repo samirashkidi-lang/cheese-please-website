@@ -39,11 +39,11 @@ ${message}
           personalizations: [{
             to: [
               { email: 'cheesepleasetampa@gmail.com' },
-              { email: 'bartentampa@gmail.com' },
+              { email: 'samirashkidi@gmail.com' },
             ],
             subject: `New Inquiry — ${name}`,
           }],
-          from: { email: 'reservations@cheesepleasetampa.com', name: 'Cheese Please Website' },
+          from: { email: 'samirashkidi@gmail.com', name: 'Cheese Please Tampa' },
           reply_to: { email, name },
           content: [{ type: 'text/plain', value: emailBody }],
         }),
