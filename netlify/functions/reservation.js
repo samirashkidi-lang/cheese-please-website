@@ -68,7 +68,8 @@ Notes: ${data.notes || 'N/A'}
           personalizations: [{
             to: [
               { email: 'cheesepleasetampa@gmail.com' },
-              { email: 'samirashkidi@gmail.com' }
+              { email: 'samirashkidi@gmail.com' },
+              { email: 'rferlopes@gmail.com' }
             ],
             subject: `New Reservation — ${data.name} | ${data.date} at ${data.time}`,
           }],

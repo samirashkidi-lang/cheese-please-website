@@ -72,6 +72,7 @@ NOTE: Payment is collected via Stripe. The customer will receive a Stripe paymen
             to: [
               { email: 'cheesepleasetampa@gmail.com' },
               { email: 'samirashkidi@gmail.com' },
+              { email: 'rferlopes@gmail.com' },
             ],
             subject: `New Board Order — ${customerName} | Pickup ${pickupDate} at ${pickupTime}`,
           }],

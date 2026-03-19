@@ -40,6 +40,7 @@ ${message}
             to: [
               { email: 'cheesepleasetampa@gmail.com' },
               { email: 'samirashkidi@gmail.com' },
+              { email: 'rferlopes@gmail.com' },
             ],
             subject: `New Inquiry — ${name}`,
           }],
