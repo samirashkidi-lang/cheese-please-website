@@ -310,7 +310,7 @@ section    { padding: 96px 0; }
 .byo-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
 .byo-card-wide { grid-column: span 1; }
 .byo-img { width: 100%; height: 280px; background: url('images/bar-bg.jpg') center/cover no-repeat; display: flex; align-items: center; justify-content: center; }
-.byo-img img { max-width: 90%; max-height: 260px; object-fit: contain; position: relative; z-index: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
+.byo-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 .byo-info { padding: 16px; }
 .byo-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .byo-title-row h4 { font-size: 1rem; font-weight: 700; color: var(--cream); }
