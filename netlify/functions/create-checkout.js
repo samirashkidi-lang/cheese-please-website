@@ -24,26 +24,33 @@ exports.handler = async (event) => {
     const itemsSummary = items.map(l => `${l.quantity}x ${l.item}`).join(', ');
     const pickupDesc   = `Pickup ${pickupDate} at ${pickupTime} · ${customerName} · ${customerPhone}`;
 
-    // ── Save to Supabase (non-blocking — don't let DB error kill checkout) ──
-    fetch(`${SUPABASE_URL}/rest/v1/board_orders`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({
-        name:        customerName,
-        email:       customerEmail,
-        phone:       customerPhone,
-        items:       itemsSummary,
-        pickup_date: pickupDate,
-        pickup_time: pickupTime,
-        total:       total,
-        status:      'pending',
-      }),
-    }).catch(err => console.warn('Supabase save failed (non-fatal):', err.message));
+    // ── Save to Supabase (await so real failures are logged, not silently dropped) ──
+    try {
+      const sbResp = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          name:   customerName,
+          email:  customerEmail,
+          phone:  customerPhone,
+          items:  itemsSummary,
+          amount: total,
+          status: 'pending',
+          notes:  `Pickup ${pickupDate} at ${pickupTime}`,
+        }),
+      });
+      if (!sbResp.ok) {
+        const errText = await sbResp.text();
+        console.error('Supabase insert failed:', sbResp.status, errText);
+      }
+    } catch (err) {
+      console.error('Supabase insert threw:', err.message);
+    }
 
     // ── Email notification to both business emails ──
     if (SENDGRID_KEY) {

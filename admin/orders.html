@@ -34,10 +34,10 @@
 <script src="admin.js"></script>
 <script>
 requireAuth();
-seedDemoData();
 renderSidebar('orders.html');
 
 let currentFilter = 'all';
+let allOrders = [];
 
 function filterTab(f, el) {
   currentFilter = f;
@@ -46,8 +46,21 @@ function filterTab(f, el) {
   renderTable();
 }
 
+async function loadOrders() {
+  const tbody = document.getElementById('ordersTable');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Loading…</td></tr>';
+  try {
+    const data = await SB.get('orders');
+    allOrders = Array.isArray(data) ? data : [];
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#c00">Failed to load orders: ${err.message}</td></tr>`;
+    return;
+  }
+  renderTable();
+}
+
 function renderTable() {
-  let data = DB.get('orders');
+  let data = allOrders;
   if (currentFilter !== 'all') data = data.filter(o => o.status === currentFilter);
 
   const tbody = document.getElementById('ordersTable');
@@ -58,10 +71,10 @@ function renderTable() {
 
   tbody.innerHTML = data.map(o => `
     <tr>
-      <td><strong>${o.name}</strong></td>
-      <td style="font-size:0.825rem">${o.items}</td>
-      <td style="font-size:0.825rem">${formatDate(o.createdAt)}<br>${formatTime(o.createdAt)}</td>
-      <td style="font-size:0.825rem">ASAP</td>
+      <td><strong>${o.name || ''}</strong><br><span style="font-size:0.75rem;color:var(--text-muted)">${o.email || ''} · ${o.phone || ''}</span></td>
+      <td style="font-size:0.825rem">${o.items || ''}</td>
+      <td style="font-size:0.825rem">${formatDate(o.created_at)}<br>${formatTime(o.created_at)}</td>
+      <td style="font-size:0.825rem">${o.notes || 'ASAP'}</td>
       <td><strong>${formatMoney(o.amount)}</strong></td>
       <td><span class="badge badge-${o.status==='accepted'?'green':o.status==='rejected'?'red':'yellow'}">${o.status}</span></td>
       <td>
@@ -76,13 +89,13 @@ function renderTable() {
   `).join('');
 }
 
-function setStatus(id, status) {
-  DB.update('orders', id, { status });
+async function setStatus(id, status) {
+  await SB.update('orders', id, { status });
   toast(status === 'accepted' ? '✓ Order accepted!' : 'Order rejected', status === 'accepted' ? 'success' : 'error');
-  renderTable();
+  await loadOrders();
 }
 
-renderTable();
+loadOrders();
 </script>
 </body>
 </html>
