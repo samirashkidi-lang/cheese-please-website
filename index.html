@@ -54,8 +54,62 @@
 
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <style>
+    /* Moving notice overlay — blocks interaction, site visible behind */
+    #moving-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background: rgba(10, 8, 6, 0.72);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      pointer-events: auto;
+    }
+    #moving-overlay .moving-card {
+      max-width: 640px;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      font-family: 'Playfair Display', Georgia, serif;
+      padding: 48px 32px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      background: rgba(20, 16, 12, 0.55);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    }
+    #moving-overlay h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      letter-spacing: 0.08em;
+      margin: 0 0 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    #moving-overlay p {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
+      line-height: 1.55;
+      margin: 0;
+      opacity: 0.92;
+    }
+    /* Lock background scroll while overlay is up */
+    html.moving-lock, body.moving-lock { overflow: hidden !important; }
+  </style>
 </head>
 <body>
+  <div id="moving-overlay" role="dialog" aria-modal="true" aria-labelledby="moving-title">
+    <div class="moving-card">
+      <h1 id="moving-title">We Are Moving</h1>
+      <p>Cheese Please is relocating. Stay tuned for our new home — follow along on Instagram for updates.</p>
+    </div>
+  </div>
+  <script>
+    document.documentElement.classList.add('moving-lock');
+    document.body.classList.add('moving-lock');
+  </script>
 
 
 <!-- ─── NAVIGATION ────────────────────────────────────────── -->
@@ -80,11 +134,9 @@
 
 <!-- ─── HERO ──────────────────────────────────────────────── -->
 <section class="hero" id="home">
-  <!-- Video Background -->
+  <!-- Hero Background Image -->
   <div class="hero-video-wrap">
-    <video class="hero-video" autoplay muted loop playsinline poster="images/hero-poster.jpg">
-      <source src="images/cheeseplease.mp4" type="video/mp4">
-    </video>
+    <img class="hero-video" src="images/hero-bg.jpg" alt="Cheese Please interior">
     <div class="hero-video-overlay"></div>
   </div>
 
